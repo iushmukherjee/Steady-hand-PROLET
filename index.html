@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prolet - Essential Tremor Experience | IANCON</title>
   <style>
     :root {
@@ -19,7 +18,6 @@
       box-sizing: border-box;
       user-select: none;
       -webkit-user-select: none;
-      touch-action: none;
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
@@ -33,7 +31,8 @@
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     header {
@@ -66,7 +65,7 @@
     main {
       flex: 1;
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -89,7 +88,6 @@
       display: flex;
     }
 
-    /* Start Screen */
     .card {
       background: white;
       padding: 30px 40px;
@@ -135,12 +133,11 @@
       box-shadow: 0 4px 12px rgba(235, 51, 56, 0.3);
     }
 
-    /* HUD Bar */
     .hud {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      max-width: 700px;
+      max-width: 800px;
       margin-bottom: 10px;
       background: white;
       padding: 10px 20px;
@@ -166,7 +163,6 @@
       font-weight: bold;
     }
 
-    /* Canvas Frame */
     .canvas-container {
       position: relative;
       background: white;
@@ -174,14 +170,15 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
+      /* Pinch-to-zoom support wrapper style */
+      touch-action: auto;
     }
 
     canvas {
       display: block;
-      touch-action: none;
+      touch-action: none; /* Drawing requires touch tracking */
     }
 
-    /* Form Styles */
     .form-group {
       text-align: left;
       margin-bottom: 18px;
@@ -209,7 +206,6 @@
       border-color: var(--prolet-blue);
     }
 
-    /* Video Container */
     .video-container {
       position: relative;
       width: 100%;
@@ -220,27 +216,34 @@
       background: #000;
     }
 
-    .video-mock {
+    video {
       width: 100%;
       height: 360px;
-      object-fit: cover;
+      object-fit: contain;
       display: block;
+      background: #000;
     }
 
     .skip-btn {
       position: absolute;
       bottom: 20px;
       right: 20px;
-      background: rgba(0,0,0,0.7);
+      background: var(--prolet-blue);
       color: white;
-      border: 1px solid rgba(255,255,255,0.4);
-      padding: 8px 18px;
-      border-radius: 20px;
+      border: 2px solid white;
+      padding: 10px 22px;
+      border-radius: 24px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 5;
+      transition: transform 0.2s;
     }
 
-    /* Leaderboard Table */
+    .skip-btn:active {
+      transform: scale(0.95);
+    }
+
     .leaderboard-table {
       width: 100%;
       border-collapse: collapse;
@@ -274,7 +277,6 @@
       font-weight: bold;
     }
 
-    /* Instruction Overlay */
     .instruction-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -302,9 +304,9 @@
         <h1>Essential Tremor Experience</h1>
         <p>Experience the impact of tremor on precise motor control. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the maze.</p>
         <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
-          ⚠️ Maximum 5 wall collisions permitted per attempt.
+          ⚠️ Maximum 5 wall collisions permitted before failing.
         </p>
-        <button class="btn btn-red" onclick="startPreTreatment()">Start Pre-Treatment Experience</button>
+        <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
 
@@ -312,15 +314,15 @@
     <div id="screen-game" class="screen">
       <div class="hud">
         <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
-        <div>Hits Left: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">5/5</span></div>
+        <div>Wall Hits: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">0/5</span></div>
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
       <div class="canvas-container">
-        <canvas id="mazeCanvas" width="700" height="450"></canvas>
+        <canvas id="mazeCanvas" width="800" height="480"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Phase</h2>
           <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the marker at <strong>START</strong> to navigate.</p>
-          <button class="btn" onclick="beginMazeDrag()">Begin</button>
+          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin</button>
         </div>
       </div>
     </div>
@@ -329,8 +331,8 @@
     <div id="screen-video" class="screen">
       <h2 style="color: var(--prolet-blue); margin-bottom: 12px;">Discover Prolet Therapeutic Efficacy</h2>
       <div class="video-container">
-        <img src="video.png" alt="Prolet Mechanism Video" class="video-mock" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'650\' height=\'360\'><rect width=\'100%\' height=\'100%\' fill=\'%2328609b\'/><text x=\'50%\' y=\'50%\' fill=\'white\' font-family=\'sans-serif\' font-size=\'24\' text-anchor=\'middle\'>Prolet Tremor Control Mechanism Video</text></svg>'">
-        <button class="skip-btn" onclick="finishVideo()">Skip / Continue &#10095;</button>
+        <video id="proletVideo" src="video.mp4" autoplay controls playsinline onended="finishVideo()"></video>
+        <button class="skip-btn" onclick="playSound('click'); finishVideo()">Skip / Continue &#10095;</button>
       </div>
     </div>
 
@@ -348,7 +350,7 @@
             <label for="docSpecialty">Specialty / Institution</label>
             <input type="text" id="docSpecialty" placeholder="Neurology, AIIMS">
           </div>
-          <button type="submit" class="btn">Proceed to Post-Prolet Test</button>
+          <button type="submit" class="btn" onclick="playSound('click')">Proceed to Post-Prolet Test</button>
         </form>
       </div>
     </div>
@@ -356,10 +358,10 @@
     <!-- SCREEN 5: GAME OVER SCREEN -->
     <div id="screen-fail" class="screen">
       <div class="card" style="border-top-color: var(--prolet-red);">
-        <h1 style="color: var(--prolet-red);">Tremor Limit Exceeded!</h1>
-        <p>Severe involuntary tremor caused <strong>5 wall collisions</strong>, preventing maze navigation.</p>
-        <p>Learn how Prolet provides targeted tremor stabilization.</p>
-        <button class="btn" onclick="goToVideoDirectly()">Watch Prolet Solution</button>
+        <h1 style="color: var(--prolet-red);">Maximum Wall Hits Reached!</h1>
+        <p>Involuntary essential tremors caused 5 wall collisions, interrupting the navigation.</p>
+        <p>Discover how Prolet provides targeted tremor stabilization.</p>
+        <button class="btn btn-red" onclick="playSound('click'); goToVideoFromFail()">Watch Prolet Solution</button>
       </div>
     </div>
 
@@ -367,7 +369,7 @@
     <div id="screen-results" class="screen">
       <div class="card" style="max-width: 650px;">
         <h1>Post-Prolet Precision Assessment</h1>
-        <div style="display: flex; justify-around: space-around; margin: 20px 0; background: var(--prolet-light); padding: 15px; border-radius: 10px;">
+        <div style="display: flex; justify-content: space-around; margin: 20px 0; background: var(--prolet-light); padding: 15px; border-radius: 10px;">
           <div>
             <div style="font-size:0.85rem; color:#666;">Stability Score</div>
             <div id="res-stability" style="font-size: 1.8rem; font-weight:bold; color:var(--prolet-green);">98%</div>
@@ -389,46 +391,92 @@
             </tr>
           </thead>
           <tbody id="leaderboard-body">
-            <!-- Dynamic rows -->
+            <!-- Dynamically populated -->
           </tbody>
         </table>
 
-        <button class="btn" onclick="resetToStart()">Finish & Restart Demo</button>
+        <button class="btn" onclick="playSound('click'); resetToStart()">Finish & Restart Demo</button>
       </div>
     </div>
   </main>
 
   <script>
+    // --- WEB AUDIO SOUND ENGINE ---
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
+          gainNode.gain.setValueAtTime(0.15, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'hit') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(120, now);
+          osc.frequency.linearRampToValueAtTime(60, now + 0.12);
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.1);
+          osc.frequency.setValueAtTime(659.25, now + 0.2);
+          gainNode.gain.setValueAtTime(0.2, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now);
+          osc.stop(now + 0.4);
+        }
+      } catch (e) {}
+    }
+
     // --- APP STATE ---
-    let currentPhase = 1; // 1: Pre-treatment, 2: Post-Prolet
-    let hitsRemaining = 5;
-    let collisionsCount = 0;
+    let currentPhase = 1;
+    let wallHitsCount = 0;
     let totalPathPoints = 0;
     let startTime = 0;
     let timerInterval = null;
     let isDragging = false;
     let doctorData = { name: '', specialty: '' };
-
-    // Default Leaderboard Data
-    let leaderboard = [
-      { name: "Dr. A. Sharma", specialty: "Neurology", stability: 98, time: 10.2 },
-      { name: "Dr. R. Kulkarni", specialty: "Neuro-medicine", stability: 95, time: 11.8 },
-      { name: "Dr. P. Mehta", specialty: "Movement Dis.", stability: 92, time: 13.1 }
-    ];
+    let leaderboard = [];
 
     // --- CANVAS & MAZE CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Maze grid map (0: Wall, 1: Path, 2: Start, 3: End)
     const mazeMap = [
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,2,1,1,0,1,1,1,3,0],
-      [0,0,0,1,0,1,0,0,1,0],
-      [0,1,1,1,1,1,0,1,1,0],
-      [0,1,0,0,0,0,0,1,0,0],
-      [0,1,1,1,1,1,1,1,1,0],
-      [0,0,0,0,0,0,0,0,0,0]
+      [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,2,1,1,1,0,1,1,1,1,1,3,0],
+      [0,0,0,0,1,0,1,0,0,0,0,1,0],
+      [0,1,1,1,1,1,1,1,1,1,0,1,0],
+      [0,1,0,0,0,0,0,0,0,1,0,1,0],
+      [0,1,1,1,1,1,1,1,0,1,1,1,0],
+      [0,0,0,0,0,0,0,1,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0]
     ];
 
     const cols = mazeMap[0].length;
@@ -444,6 +492,13 @@
       for (let c = 0; c < cols; c++) {
         if (mazeMap[r][c] === 2) startPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
         if (mazeMap[r][c] === 3) endPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
+      }
+    }
+
+    // --- HAPTIC FEEDBACK ---
+    function triggerHaptic(pattern = 40) {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(pattern); } catch (e) {}
       }
     }
 
@@ -466,8 +521,7 @@
     }
 
     function setupGameUI() {
-      hitsRemaining = 5;
-      collisionsCount = 0;
+      wallHitsCount = 0;
       totalPathPoints = 0;
       playerPos = { ...startPos };
 
@@ -486,7 +540,7 @@
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
-      document.getElementById('hud-hits').innerText = `${hitsRemaining}/5`;
+      document.getElementById('hud-hits').innerText = `${wallHitsCount}/5`;
       document.getElementById('hud-timer').innerText = "0.0s";
       document.getElementById('maze-overlay').style.display = 'flex';
       drawMaze();
@@ -497,6 +551,7 @@
       startTime = Date.now();
       timerInterval = setInterval(updateTimer, 100);
       isDragging = false;
+      triggerHaptic(20);
     }
 
     function updateTimer() {
@@ -533,24 +588,24 @@
             ctx.fillStyle = "rgba(40, 167, 69, 0.2)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#28a745";
-            ctx.font = "bold 14px sans-serif";
+            ctx.font = "bold 13px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("START", x + cellW/2, y + cellH/2 + 5);
+            ctx.fillText("START", x + cellW/2, y + cellH/2 + 4);
           }
 
           if (mazeMap[r][c] === 3) {
             ctx.fillStyle = "rgba(235, 51, 56, 0.2)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#eb3338";
-            ctx.font = "bold 14px sans-serif";
+            ctx.font = "bold 13px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 5);
+            ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 4);
           }
         }
       }
 
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 16, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
@@ -567,7 +622,7 @@
       let targetY = e.clientY - rect.top;
 
       const distToPlayer = Math.hypot(targetX - playerPos.x, targetY - playerPos.y);
-      if (!isDragging && distToPlayer < 35) {
+      if (!isDragging && distToPlayer < 40) {
         isDragging = true;
       }
 
@@ -575,6 +630,7 @@
 
       totalPathPoints++;
 
+      // Essential Tremor simulation applied in Phase 1 causing natural wall collisions
       if (currentPhase === 1) {
         const tremorIntensity = 18;
         targetX += (Math.random() - 0.5) * tremorIntensity;
@@ -586,17 +642,17 @@
 
       if (cellC >= 0 && cellC < cols && cellR >= 0 && cellR < rows) {
         if (mazeMap[cellR][cellC] === 0) {
-          collisionsCount++;
-          if (currentPhase === 1) {
-            hitsRemaining--;
-            document.getElementById('hud-hits').innerText = `${hitsRemaining}/5`;
+          wallHitsCount++;
+          document.getElementById('hud-hits').innerText = `${wallHitsCount}/5`;
+          triggerHaptic(50);
+          playSound('hit');
 
-            if (hitsRemaining <= 0) {
-              stopTimer();
-              isDragging = false;
-              showScreen('screen-fail');
-              return;
-            }
+          // Strict 5 wall hit rule applies to BOTH phases equally
+          if (wallHitsCount >= 5) {
+            stopTimer();
+            isDragging = false;
+            showScreen('screen-fail');
+            return;
           }
         } else {
           playerPos.x = targetX;
@@ -607,9 +663,11 @@
       drawMaze();
 
       const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
-      if (distToEnd < 25) {
+      if (distToEnd < 22) {
         stopTimer();
         isDragging = false;
+        triggerHaptic([80, 50, 80]);
+        playSound('success');
         handlePhaseComplete();
       }
     }
@@ -626,17 +684,29 @@
     function handlePhaseComplete() {
       if (currentPhase === 1) {
         showScreen('screen-video');
+        const vid = document.getElementById('proletVideo');
+        if (vid) {
+          vid.currentTime = 0;
+          vid.play().catch(e => {});
+        }
       } else {
         renderResults();
       }
     }
 
     function finishVideo() {
+      const vid = document.getElementById('proletVideo');
+      if (vid) vid.pause();
       showScreen('screen-register');
     }
 
-    function goToVideoDirectly() {
+    function goToVideoFromFail() {
       showScreen('screen-video');
+      const vid = document.getElementById('proletVideo');
+      if (vid) {
+        vid.currentTime = 0;
+        vid.play().catch(e => {});
+      }
     }
 
     function submitRegistration(e) {
@@ -649,7 +719,9 @@
 
     function renderResults() {
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      let stabilityPct = Math.max(70, Math.min(99, Math.round(100 - (collisionsCount / (totalPathPoints || 1)) * 150)));
+      
+      // Natural stability metric calculation based purely on precision performance (wall hits vs path points)
+      let stabilityPct = Math.max(75, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 120)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
       document.getElementById('res-time').innerText = `${timeTaken}s`;
@@ -663,20 +735,26 @@
         });
       }
 
+      // Leaderboard sorting: Primary = Stability %, Secondary = Fastest Time
       leaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
 
       const tbody = document.getElementById('leaderboard-body');
       tbody.innerHTML = '';
-      leaderboard.slice(0, 5).forEach((entry, idx) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><span class="badge-rank">${idx + 1}</span></td>
-          <td><strong>${entry.name}</strong><br><small style="color:#777">${entry.specialty}</small></td>
-          <td style="color:var(--prolet-green); font-weight:bold;">${entry.stability}%</td>
-          <td style="color:var(--prolet-blue); font-weight:bold;">${entry.time}s</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      
+      if (leaderboard.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">No entries yet. Be the first!</td></tr>`;
+      } else {
+        leaderboard.slice(0, 5).forEach((entry, idx) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><span class="badge-rank">${idx + 1}</span></td>
+            <td><strong>${entry.name}</strong><br><small style="color:#777">${entry.specialty}</small></td>
+            <td style="color:var(--prolet-green); font-weight:bold;">${entry.stability}%</td>
+            <td style="color:var(--prolet-blue); font-weight:bold;">${entry.time}s</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
 
       showScreen('screen-results');
     }
