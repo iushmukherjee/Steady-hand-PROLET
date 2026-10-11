@@ -165,9 +165,9 @@
 
     .canvas-container {
       position: relative;
-      background: white;
+      background: #0d1b2a;
       border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
       touch-action: auto;
@@ -279,7 +279,8 @@
     .instruction-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255,255,255,0.92);
+      background: rgba(13, 27, 42, 0.92);
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -300,8 +301,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Essential Tremor Experience</h1>
-        <p>Experience the impact of tremor on precise motor control. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the maze.</p>
+        <h1>Neurological Circuit Trace</h1>
+        <p>Test precision on a complex circuit trace path. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
         <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
           ⚠️ Maximum 30 wall collisions permitted before failing.
         </p>
@@ -309,7 +310,7 @@
       </div>
     </div>
 
-    <!-- SCREEN 2: GAMEPLAY (MAZE) -->
+    <!-- SCREEN 2: GAMEPLAY (CIRCUIT TRACE) -->
     <div id="screen-game" class="screen">
       <div class="hud">
         <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
@@ -319,9 +320,9 @@
       <div class="canvas-container">
         <canvas id="mazeCanvas" width="800" height="480"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
-          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Phase</h2>
-          <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the marker at <strong>START</strong> to navigate.</p>
-          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin</button>
+          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Circuit Trace</h2>
+          <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the node at <strong>START</strong> along the circuit traces.</p>
+          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin Trace</button>
         </div>
       </div>
     </div>
@@ -358,7 +359,7 @@
     <div id="screen-fail" class="screen">
       <div class="card" style="border-top-color: var(--prolet-red);">
         <h1 style="color: var(--prolet-red);">Maximum Wall Hits Reached!</h1>
-        <p>Involuntary essential tremors caused 30 wall collisions, interrupting the navigation.</p>
+        <p>Involuntary essential tremors caused 30 wall collisions, interrupting the circuit trace.</p>
         <p>Discover how Prolet provides targeted tremor stabilization.</p>
         <button class="btn btn-red" onclick="playSound('click'); goToVideoFromFail()">Watch Prolet Solution</button>
       </div>
@@ -463,21 +464,20 @@
     let doctorData = { name: '', specialty: '' };
     let leaderboard = [];
 
-    // --- CANVAS & COMPLICATED MAZE CONFIG ---
+    // --- CANVAS & CIRCUIT MAZE CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // More complex multi-turn maze grid (0: Wall, 1: Path, 2: Start, 3: End)
     const mazeMap = [
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,2,1,1,0,1,1,1,0,1,1,1,1,3,0],
-      [0,0,0,1,0,1,0,1,0,1,0,0,0,1,0],
-      [0,1,1,1,1,1,0,1,1,1,1,1,0,1,0],
-      [0,1,0,0,0,0,0,0,0,0,0,1,0,1,0],
-      [0,1,1,1,0,1,1,1,1,1,0,1,1,1,0],
-      [0,0,0,1,0,1,0,0,0,1,0,0,0,0,0],
-      [0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,2,1,1,1,0,1,1,1,1,1,0,1,1,1,3,0],
+      [0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0],
+      [0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0],
+      [0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0],
+      [0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0],
+      [0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0],
+      [0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ];
 
     const cols = mazeMap[0].length;
@@ -532,26 +532,26 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Circuit Trace";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
         hudPhase.className = "phase-badge phase-2";
-        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Navigation";
+        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Circuit Trace";
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
       document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
       document.getElementById('hud-timer').innerText = "0.0s";
       document.getElementById('maze-overlay').style.display = 'flex';
-      drawMaze();
+      drawCircuitBoard();
     }
 
     function beginMazeDrag() {
       document.getElementById('maze-overlay').style.display = 'none';
       startTime = Date.now();
       timerInterval = setInterval(updateTimer, 100);
-      isDragging = false;
+      isDragging = true; // Automatically active when starting
       triggerHaptic(20);
     }
 
@@ -564,8 +564,8 @@
       clearInterval(timerInterval);
     }
 
-    // --- MAZE RENDERING ---
-    function drawMaze() {
+    // --- CIRCUIT BOARD RENDERING ---
+    function drawCircuitBoard() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (let r = 0; r < rows; r++) {
@@ -574,31 +574,31 @@
           const y = r * cellH;
 
           if (mazeMap[r][c] === 0) {
-            ctx.fillStyle = "#28609b";
+            ctx.fillStyle = "#1b263b";
             ctx.fillRect(x, y, cellW, cellH);
           } else {
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = "#112233";
             ctx.fillRect(x, y, cellW, cellH);
 
-            ctx.strokeStyle = "#e2e8f0";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x, y, cellW, cellH);
+            ctx.strokeStyle = "#28609b";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 4, y + 4, cellW - 8, cellH - 8);
           }
 
           if (mazeMap[r][c] === 2) {
-            ctx.fillStyle = "rgba(40, 167, 69, 0.2)";
+            ctx.fillStyle = "rgba(40, 167, 69, 0.3)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#28a745";
-            ctx.font = "bold 11px sans-serif";
+            ctx.font = "bold 10px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("START", x + cellW/2, y + cellH/2 + 4);
           }
 
           if (mazeMap[r][c] === 3) {
-            ctx.fillStyle = "rgba(235, 51, 56, 0.2)";
+            ctx.fillStyle = "rgba(235, 51, 56, 0.3)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#eb3338";
-            ctx.font = "bold 11px sans-serif";
+            ctx.font = "bold 10px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 4);
           }
@@ -615,23 +615,21 @@
     }
 
     // --- INTERACTION & TREMOR LOGIC ---
-    function handlePointerMove(e) {
+    function handlePointerDown(e) {
       if (document.getElementById('maze-overlay').style.display !== 'none') return;
+      isDragging = true;
+      handlePointerMove(e);
+    }
+
+    function handlePointerMove(e) {
+      if (!isDragging || document.getElementById('maze-overlay').style.display !== 'none') return;
 
       const rect = canvas.getBoundingClientRect();
       let targetX = e.clientX - rect.left;
       let targetY = e.clientY - rect.top;
 
-      const distToPlayer = Math.hypot(targetX - playerPos.x, targetY - playerPos.y);
-      if (!isDragging && distToPlayer < 35) {
-        isDragging = true;
-      }
-
-      if (!isDragging) return;
-
       totalPathPoints++;
 
-      // Essential Tremor simulation applied in Phase 1 causing natural wall collisions
       if (currentPhase === 1) {
         const tremorIntensity = 18;
         targetX += (Math.random() - 0.5) * tremorIntensity;
@@ -648,7 +646,6 @@
           triggerHaptic(50);
           playSound('hit');
 
-          // Strict 30 wall hit rule applies to BOTH phases equally
           if (wallHitsCount >= 30) {
             stopTimer();
             isDragging = false;
@@ -661,7 +658,7 @@
         }
       }
 
-      drawMaze();
+      drawCircuitBoard();
 
       const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
       if (distToEnd < 20) {
@@ -677,7 +674,7 @@
       isDragging = false;
     }
 
-    canvas.addEventListener('pointerdown', handlePointerMove);
+    canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerup', handlePointerUp);
 
@@ -721,7 +718,6 @@
     function renderResults() {
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
       
-      // Natural stability metric calculation based purely on precision performance (wall hits vs path points)
       let stabilityPct = Math.max(70, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 95)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
@@ -736,7 +732,6 @@
         });
       }
 
-      // Leaderboard sorting: Primary = Stability %, Secondary = Fastest Time
       leaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
 
       const tbody = document.getElementById('leaderboard-body');
