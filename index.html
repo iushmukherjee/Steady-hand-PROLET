@@ -299,10 +299,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Neurological Circuit Trace</h1>
-        <p>Test precision on a single continuous track with bends. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
-        <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
-          ⚠️ Maximum 30 wall collisions permitted before failing.
-        </p>
+        <p>Test precision on a single continuous track with bends. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -311,7 +308,6 @@
     <div id="screen-game" class="screen">
       <div class="hud">
         <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
-        <div>Wall Hits: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">0/30</span></div>
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
       <div class="canvas-container">
@@ -354,11 +350,10 @@
 
     <!-- SCREEN 5: GAME OVER SCREEN -->
     <div id="screen-fail" class="screen">
-      <div class="card" style="border-top-color: var(--prolet-red);">
-        <h1 style="color: var(--prolet-red);">Maximum Wall Hits Reached!</h1>
-        <p>Vigorous essential tremors caused 30 wall collisions, interrupting the circuit trace.</p>
-        <p>Discover how Prolet provides targeted tremor stabilization.</p>
-        <button class="btn btn-red" onclick="playSound('click'); goToVideoFromFail()">Watch Prolet Solution</button>
+      <div class="card" id="fail-card" style="border-top-color: var(--prolet-red);">
+        <h1 id="fail-title" style="color: var(--prolet-red);">Essential Tremors Uncontrolled</h1>
+        <p id="fail-msg">Involuntary essential tremors caused significant motor disruption during navigation. Discover how Prolet provides targeted tremor stabilization.</p>
+        <button class="btn btn-red" id="fail-btn" onclick="playSound('click'); handleFailAction()">Watch Prolet Solution</button>
       </div>
     </div>
 
@@ -461,26 +456,24 @@
     let doctorData = { name: '', specialty: '' };
     let leaderboard = [];
 
-    // --- TRUE SINGLE BENDING TRACK PATH CONFIG ---
+    // --- TRACK CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Define strict single track waypoints (X, Y in canvas coordinates) forming a single winding path with bends
     const trackPoints = [
-      { x: 70, y: 370 },   // START
-      { x: 70, y: 90 },    // Bend 1 up
-      { x: 230, y: 90 },   // Bend 2 right
-      { x: 230, y: 350 },  // Bend 3 down
-      { x: 390, y: 350 },  // Bend 4 right
-      { x: 390, y: 90 },   // Bend 5 up
-      { x: 550, y: 90 },   // Bend 6 right
-      { x: 550, y: 350 },  // Bend 7 down
-      { x: 710, y: 350 },  // Bend 8 right
-      { x: 710, y: 90 }    // FINISH
+      { x: 70, y: 370 },
+      { x: 70, y: 90 },
+      { x: 230, y: 90 },
+      { x: 230, y: 350 },
+      { x: 390, y: 350 },
+      { x: 390, y: 90 },
+      { x: 550, y: 90 },
+      { x: 550, y: 350 },
+      { x: 710, y: 350 },
+      { x: 710, y: 90 }
     ];
 
-    const trackWidth = 52; // Wide single track
-
+    const trackWidth = 52;
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
@@ -526,7 +519,6 @@
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
-      document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
       document.getElementById('hud-timer').innerText = "0.0s";
       document.getElementById('maze-overlay').style.display = 'flex';
       drawTrack();
@@ -549,7 +541,6 @@
       clearInterval(timerInterval);
     }
 
-    // Helper: Distance from point (px, py) to line segment (x1, y1) -> (x2, y2)
     function distanceToSegment(px, py, x1, y1, x2, y2) {
       const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
       if (l2 === 0) return Math.hypot(px - x1, py - y1);
@@ -558,7 +549,6 @@
       return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
     }
 
-    // Check if position is inside the single winding track
     function isOnTrack(x, y) {
       for (let i = 0; i < trackPoints.length - 1; i++) {
         const dist = distanceToSegment(x, y, trackPoints[i].x, trackPoints[i].y, trackPoints[i+1].x, trackPoints[i+1].y);
@@ -570,11 +560,9 @@
     function drawTrack() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw background board
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw the single continuous track with thick borders (dividers)
       ctx.strokeStyle = "#28609b";
       ctx.lineWidth = trackWidth + 6;
       ctx.lineCap = "round";
@@ -587,12 +575,10 @@
       }
       ctx.stroke();
 
-      // Track inner floor
       ctx.strokeStyle = "#112233";
       ctx.lineWidth = trackWidth;
       ctx.stroke();
 
-      // START node indicator
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
       ctx.arc(trackPoints[0].x, trackPoints[0].y, 22, 0, Math.PI * 2);
@@ -603,7 +589,6 @@
       ctx.textBaseline = "middle";
       ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
 
-      // FINISH node indicator
       const last = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
@@ -615,7 +600,6 @@
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
-      // Player cursor node
       ctx.beginPath();
       ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
@@ -651,35 +635,30 @@
 
       totalPathPoints++;
 
-      // Vigorous tremor shaking displacement in Phase 1
       if (currentPhase === 1) {
         const tremorIntensity = 28;
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
 
-      // Check if target is inside the track dividers
       if (isOnTrack(targetX, targetY)) {
         playerPos.x = targetX;
         playerPos.y = targetY;
       } else {
-        // Wall / Divider hit!
         wallHitsCount++;
-        document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
         triggerHaptic(50);
         playSound('hit');
 
         if (wallHitsCount >= 30) {
           stopTimer();
           isDragging = false;
-          showScreen('screen-fail');
+          triggerGameOver();
           return;
         }
       }
 
       drawTrack();
 
-      // Check arrival at FINISH
       const last = trackPoints[trackPoints.length - 1];
       const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
       if (distToEnd < 20) {
@@ -703,6 +682,44 @@
     canvas.addEventListener('mousemove', handleMove);
     canvas.addEventListener('mouseup', handleEnd);
 
+    function triggerGameOver() {
+      const failCard = document.getElementById('fail-card');
+      const title = document.getElementById('fail-title');
+      const msg = document.getElementById('fail-msg');
+      const btn = document.getElementById('fail-btn');
+
+      if (currentPhase === 1) {
+        failCard.style.borderTopColor = 'var(--prolet-red)';
+        title.innerText = 'Essential Tremors Uncontrolled';
+        title.style.color = 'var(--prolet-red)';
+        msg.innerText = 'Involuntary essential tremors caused significant motor disruption during navigation. Discover how Prolet provides targeted tremor stabilization.';
+        btn.innerText = 'Watch Prolet Solution';
+        btn.className = 'btn btn-red';
+      } else {
+        failCard.style.borderTopColor = 'var(--prolet-blue)';
+        title.innerText = 'Game Over';
+        title.style.color = 'var(--prolet-blue)';
+        msg.innerText = 'Maximum precision deviation reached. Try again to qualify for the IANCON Leaderboard.';
+        btn.innerText = 'Try Again';
+        btn.className = 'btn';
+      }
+
+      showScreen('screen-fail');
+    }
+
+    function handleFailAction() {
+      if (currentPhase === 1) {
+        showScreen('screen-video');
+        const vid = document.getElementById('proletVideo');
+        if (vid) {
+          vid.currentTime = 0;
+          vid.play().catch(e => {});
+        }
+      } else {
+        startPostTreatment();
+      }
+    }
+
     function handlePhaseComplete() {
       if (currentPhase === 1) {
         showScreen('screen-video');
@@ -720,15 +737,6 @@
       const vid = document.getElementById('proletVideo');
       if (vid) vid.pause();
       showScreen('screen-register');
-    }
-
-    function goToVideoFromFail() {
-      showScreen('screen-video');
-      const vid = document.getElementById('proletVideo');
-      if (vid) {
-        vid.currentTime = 0;
-        vid.play().catch(e => {});
-      }
     }
 
     function submitRegistration(e) {
