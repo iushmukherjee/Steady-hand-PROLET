@@ -298,8 +298,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Neurological Circuit Trace</h1>
-        <p>Test precision on a single continuous track with bends. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <h1>Advanced Neurological Circuit Trace</h1>
+        <p>Test precision on a high-difficulty narrow circuit track. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -314,8 +314,8 @@
         <canvas id="mazeCanvas" width="780" height="440"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 10px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch or click and drag the node at <strong>START</strong> along the single track.</p>
-          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin Trace</button>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch/click and drag the node at <strong>START</strong> along the narrow track. Timer starts on movement.</p>
+          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready</button>
         </div>
       </div>
     </div>
@@ -393,28 +393,23 @@
   </main>
 
   <script>
-    // --- WEB AUDIO SOUND ENGINE ---
-    let audioCtx = null;
+    let localLeaderboard = JSON.parse(localStorage.getItem('prolet_leaderboard') || '[]');
 
+    // --- WEB AUDIO ENGINE ---
+    let audioCtx = null;
     function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function playSound(type) {
       try {
         initAudio();
         if (!audioCtx) return;
-
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-
         const now = audioCtx.currentTime;
 
         if (type === 'click') {
@@ -423,16 +418,14 @@
           osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
           gainNode.gain.setValueAtTime(0.15, now);
           gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-          osc.start(now);
-          osc.stop(now + 0.08);
+          osc.start(now); osc.stop(now + 0.08);
         } else if (type === 'hit') {
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(120, now);
           osc.frequency.linearRampToValueAtTime(60, now + 0.12);
           gainNode.gain.setValueAtTime(0.2, now);
           gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-          osc.start(now);
-          osc.stop(now + 0.12);
+          osc.start(now); osc.stop(now + 0.12);
         } else if (type === 'success') {
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(440, now);
@@ -440,8 +433,7 @@
           osc.frequency.setValueAtTime(659.25, now + 0.2);
           gainNode.gain.setValueAtTime(0.2, now);
           gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-          osc.start(now);
-          osc.stop(now + 0.4);
+          osc.start(now); osc.stop(now + 0.4);
         }
       } catch (e) {}
     }
@@ -451,29 +443,31 @@
     let wallHitsCount = 0;
     let totalPathPoints = 0;
     let startTime = 0;
+    let timerStarted = false;
     let timerInterval = null;
     let isDragging = false;
     let doctorData = { name: '', specialty: '' };
-    let leaderboard = [];
 
-    // --- TRACK CONFIG ---
+    // --- NARROW & COMPLEX TRACK CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 70, y: 370 },
-      { x: 70, y: 90 },
-      { x: 230, y: 90 },
-      { x: 230, y: 350 },
-      { x: 390, y: 350 },
-      { x: 390, y: 90 },
-      { x: 550, y: 90 },
-      { x: 550, y: 350 },
-      { x: 710, y: 350 },
-      { x: 710, y: 90 }
+      { x: 55, y: 380 },
+      { x: 55, y: 65 },
+      { x: 170, y: 65 },
+      { x: 170, y: 375 },
+      { x: 285, y: 375 },
+      { x: 285, y: 65 },
+      { x: 400, y: 65 },
+      { x: 400, y: 375 },
+      { x: 515, y: 375 },
+      { x: 515, y: 65 },
+      { x: 630, y: 65 },
+      { x: 725, y: 380 }
     ];
 
-    const trackWidth = 52;
+    const trackWidth = 36; // Narrower track for increased difficulty
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
@@ -502,6 +496,8 @@
     function setupGameUI() {
       wallHitsCount = 0;
       totalPathPoints = 0;
+      timerStarted = false;
+      stopTimer();
       playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
       const hudPhase = document.getElementById('hud-phase');
@@ -510,12 +506,12 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment Vigorous Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment High-Intensity Tremor Simulation";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
         hudPhase.className = "phase-badge phase-2";
-        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Track Trace";
+        overlayTitle.innerText = "Phase 2: Post-Prolet Precision Track Trace";
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
@@ -526,10 +522,16 @@
 
     function beginMazeDrag() {
       document.getElementById('maze-overlay').style.display = 'none';
-      startTime = Date.now();
-      timerInterval = setInterval(updateTimer, 100);
-      isDragging = true;
+      isDragging = false;
       triggerHaptic(20);
+    }
+
+    function startTimerIfNeeded() {
+      if (!timerStarted) {
+        timerStarted = true;
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 100);
+      }
     }
 
     function updateTimer() {
@@ -538,7 +540,8 @@
     }
 
     function stopTimer() {
-      clearInterval(timerInterval);
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
     }
 
     function distanceToSegment(px, py, x1, y1, x2, y2) {
@@ -559,7 +562,6 @@
 
     function drawTrack() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -581,10 +583,10 @@
 
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
-      ctx.arc(trackPoints[0].x, trackPoints[0].y, 22, 0, Math.PI * 2);
+      ctx.arc(trackPoints[0].x, trackPoints[0].y, 20, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 10px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
@@ -592,16 +594,16 @@
       const last = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 22, 0, Math.PI * 2);
+      ctx.arc(last.x, last.y, 20, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 10px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 12, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
@@ -629,6 +631,8 @@
       if (!isDragging || document.getElementById('maze-overlay').style.display !== 'none') return;
       if (e.cancelable) e.preventDefault();
 
+      startTimerIfNeeded();
+
       const coords = getCanvasCoords(e);
       let targetX = coords.x;
       let targetY = coords.y;
@@ -636,7 +640,7 @@
       totalPathPoints++;
 
       if (currentPhase === 1) {
-        const tremorIntensity = 28;
+        const tremorIntensity = 34; // Increased vigorous shaking
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
@@ -661,7 +665,7 @@
 
       const last = trackPoints[trackPoints.length - 1];
       const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
-      if (distToEnd < 20) {
+      if (distToEnd < 18) {
         stopTimer();
         isDragging = false;
         triggerHaptic([80, 50, 80]);
@@ -711,10 +715,7 @@
       if (currentPhase === 1) {
         showScreen('screen-video');
         const vid = document.getElementById('proletVideo');
-        if (vid) {
-          vid.currentTime = 0;
-          vid.play().catch(e => {});
-        }
+        if (vid) { vid.currentTime = 0; vid.play().catch(e => {}); }
       } else {
         startPostTreatment();
       }
@@ -724,10 +725,7 @@
       if (currentPhase === 1) {
         showScreen('screen-video');
         const vid = document.getElementById('proletVideo');
-        if (vid) {
-          vid.currentTime = 0;
-          vid.play().catch(e => {});
-        }
+        if (vid) { vid.currentTime = 0; vid.play().catch(e => {}); }
       } else {
         renderResults();
       }
@@ -749,29 +747,29 @@
 
     function renderResults() {
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      let stabilityPct = Math.max(70, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 95)));
+      let stabilityPct = Math.max(65, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 110)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
       document.getElementById('res-time').innerText = `${timeTaken}s`;
 
       if (doctorData.name) {
-        leaderboard.push({
+        localLeaderboard.push({
           name: doctorData.name,
           specialty: doctorData.specialty,
           stability: stabilityPct,
           time: timeTaken
         });
+        localLeaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
+        localStorage.setItem('prolet_leaderboard', JSON.stringify(localLeaderboard));
       }
-
-      leaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
 
       const tbody = document.getElementById('leaderboard-body');
       tbody.innerHTML = '';
       
-      if (leaderboard.length === 0) {
+      if (localLeaderboard.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">No entries yet. Be the first!</td></tr>`;
       } else {
-        leaderboard.slice(0, 5).forEach((entry, idx) => {
+        localLeaderboard.slice(0, 5).forEach((entry, idx) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><span class="badge-rank">${idx + 1}</span></td>
