@@ -170,13 +170,12 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
-      /* Pinch-to-zoom support wrapper style */
       touch-action: auto;
     }
 
     canvas {
       display: block;
-      touch-action: none; /* Drawing requires touch tracking */
+      touch-action: none;
     }
 
     .form-group {
@@ -304,7 +303,7 @@
         <h1>Essential Tremor Experience</h1>
         <p>Experience the impact of tremor on precise motor control. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the maze.</p>
         <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
-          ⚠️ Maximum 5 wall collisions permitted before failing.
+          ⚠️ Maximum 30 wall collisions permitted before failing.
         </p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
@@ -314,7 +313,7 @@
     <div id="screen-game" class="screen">
       <div class="hud">
         <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
-        <div>Wall Hits: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">0/5</span></div>
+        <div>Wall Hits: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">0/30</span></div>
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
       <div class="canvas-container">
@@ -359,7 +358,7 @@
     <div id="screen-fail" class="screen">
       <div class="card" style="border-top-color: var(--prolet-red);">
         <h1 style="color: var(--prolet-red);">Maximum Wall Hits Reached!</h1>
-        <p>Involuntary essential tremors caused 5 wall collisions, interrupting the navigation.</p>
+        <p>Involuntary essential tremors caused 30 wall collisions, interrupting the navigation.</p>
         <p>Discover how Prolet provides targeted tremor stabilization.</p>
         <button class="btn btn-red" onclick="playSound('click'); goToVideoFromFail()">Watch Prolet Solution</button>
       </div>
@@ -464,19 +463,21 @@
     let doctorData = { name: '', specialty: '' };
     let leaderboard = [];
 
-    // --- CANVAS & MAZE CONFIG ---
+    // --- CANVAS & COMPLICATED MAZE CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
+    // More complex multi-turn maze grid (0: Wall, 1: Path, 2: Start, 3: End)
     const mazeMap = [
-      [0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,2,1,1,1,0,1,1,1,1,1,3,0],
-      [0,0,0,0,1,0,1,0,0,0,0,1,0],
-      [0,1,1,1,1,1,1,1,1,1,0,1,0],
-      [0,1,0,0,0,0,0,0,0,1,0,1,0],
-      [0,1,1,1,1,1,1,1,0,1,1,1,0],
-      [0,0,0,0,0,0,0,1,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,2,1,1,0,1,1,1,0,1,1,1,1,3,0],
+      [0,0,0,1,0,1,0,1,0,1,0,0,0,1,0],
+      [0,1,1,1,1,1,0,1,1,1,1,1,0,1,0],
+      [0,1,0,0,0,0,0,0,0,0,0,1,0,1,0],
+      [0,1,1,1,0,1,1,1,1,1,0,1,1,1,0],
+      [0,0,0,1,0,1,0,0,0,1,0,0,0,0,0],
+      [0,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ];
 
     const cols = mazeMap[0].length;
@@ -540,7 +541,7 @@
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
-      document.getElementById('hud-hits').innerText = `${wallHitsCount}/5`;
+      document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
       document.getElementById('hud-timer').innerText = "0.0s";
       document.getElementById('maze-overlay').style.display = 'flex';
       drawMaze();
@@ -588,7 +589,7 @@
             ctx.fillStyle = "rgba(40, 167, 69, 0.2)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#28a745";
-            ctx.font = "bold 13px sans-serif";
+            ctx.font = "bold 11px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("START", x + cellW/2, y + cellH/2 + 4);
           }
@@ -597,7 +598,7 @@
             ctx.fillStyle = "rgba(235, 51, 56, 0.2)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#eb3338";
-            ctx.font = "bold 13px sans-serif";
+            ctx.font = "bold 11px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 4);
           }
@@ -605,7 +606,7 @@
       }
 
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 12, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
@@ -622,7 +623,7 @@
       let targetY = e.clientY - rect.top;
 
       const distToPlayer = Math.hypot(targetX - playerPos.x, targetY - playerPos.y);
-      if (!isDragging && distToPlayer < 40) {
+      if (!isDragging && distToPlayer < 35) {
         isDragging = true;
       }
 
@@ -643,12 +644,12 @@
       if (cellC >= 0 && cellC < cols && cellR >= 0 && cellR < rows) {
         if (mazeMap[cellR][cellC] === 0) {
           wallHitsCount++;
-          document.getElementById('hud-hits').innerText = `${wallHitsCount}/5`;
+          document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
           triggerHaptic(50);
           playSound('hit');
 
-          // Strict 5 wall hit rule applies to BOTH phases equally
-          if (wallHitsCount >= 5) {
+          // Strict 30 wall hit rule applies to BOTH phases equally
+          if (wallHitsCount >= 30) {
             stopTimer();
             isDragging = false;
             showScreen('screen-fail');
@@ -663,7 +664,7 @@
       drawMaze();
 
       const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
-      if (distToEnd < 22) {
+      if (distToEnd < 20) {
         stopTimer();
         isDragging = false;
         triggerHaptic([80, 50, 80]);
@@ -721,7 +722,7 @@
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
       
       // Natural stability metric calculation based purely on precision performance (wall hits vs path points)
-      let stabilityPct = Math.max(75, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 120)));
+      let stabilityPct = Math.max(70, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 95)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
       document.getElementById('res-time').innerText = `${timeTaken}s`;
