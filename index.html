@@ -302,7 +302,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Neurological Circuit Trace</h1>
-        <p>Test precision on a complex circuit trace path. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
+        <p>Test precision on a single-path circuit trace. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
         <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
           ⚠️ Maximum 30 wall collisions permitted before failing.
         </p>
@@ -321,7 +321,7 @@
         <canvas id="mazeCanvas" width="800" height="480"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the node at <strong>START</strong> along the circuit traces.</p>
+          <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the node at <strong>START</strong> along the single-path circuit.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin Trace</button>
         </div>
       </div>
@@ -359,7 +359,7 @@
     <div id="screen-fail" class="screen">
       <div class="card" style="border-top-color: var(--prolet-red);">
         <h1 style="color: var(--prolet-red);">Maximum Wall Hits Reached!</h1>
-        <p>Involuntary essential tremors caused 30 wall collisions, interrupting the circuit trace.</p>
+        <p>Vigorous essential tremors caused 30 wall collisions, interrupting the circuit trace.</p>
         <p>Discover how Prolet provides targeted tremor stabilization.</p>
         <button class="btn btn-red" onclick="playSound('click'); goToVideoFromFail()">Watch Prolet Solution</button>
       </div>
@@ -464,20 +464,22 @@
     let doctorData = { name: '', specialty: '' };
     let leaderboard = [];
 
-    // --- CANVAS & CIRCUIT MAZE CONFIG ---
+    // --- CANVAS & WIDER SINGLE-WAY CIRCUIT CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
+    // Single-way circuit grid (0: Wall, 1: Path, 2: Start, 3: End)
+    // Designed with a wider track and strictly single sequential channel (no fork/alternate paths)
     const mazeMap = [
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,2,1,1,1,0,1,1,1,1,1,0,1,1,1,3,0],
-      [0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0],
-      [0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0],
-      [0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0],
-      [0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0],
-      [0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0],
-      [0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+      [0,0,0,0,0,0,0,0,0,0,0,0],
+      [0,2,1,1,1,1,1,1,1,1,3,0],
+      [0,0,0,0,0,0,0,0,0,0,1,0],
+      [0,1,1,1,1,1,1,1,1,1,1,0],
+      [0,1,0,0,0,0,0,0,0,0,0,0],
+      [0,1,1,1,1,1,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0,1,0],
+      [0,1,1,1,1,1,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0,0,0]
     ];
 
     const cols = mazeMap[0].length;
@@ -532,7 +534,7 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment Circuit Trace";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Vigorous Tremor Simulation";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
@@ -551,7 +553,7 @@
       document.getElementById('maze-overlay').style.display = 'none';
       startTime = Date.now();
       timerInterval = setInterval(updateTimer, 100);
-      isDragging = true; // Automatically active when starting
+      isDragging = true;
       triggerHaptic(20);
     }
 
@@ -582,14 +584,14 @@
 
             ctx.strokeStyle = "#28609b";
             ctx.lineWidth = 2;
-            ctx.strokeRect(x + 4, y + 4, cellW - 8, cellH - 8);
+            ctx.strokeRect(x + 2, y + 2, cellW - 4, cellH - 4);
           }
 
           if (mazeMap[r][c] === 2) {
             ctx.fillStyle = "rgba(40, 167, 69, 0.3)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#28a745";
-            ctx.font = "bold 10px sans-serif";
+            ctx.font = "bold 11px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("START", x + cellW/2, y + cellH/2 + 4);
           }
@@ -598,7 +600,7 @@
             ctx.fillStyle = "rgba(235, 51, 56, 0.3)";
             ctx.fillRect(x, y, cellW, cellH);
             ctx.fillStyle = "#eb3338";
-            ctx.font = "bold 10px sans-serif";
+            ctx.font = "bold 11px sans-serif";
             ctx.textAlign = "center";
             ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 4);
           }
@@ -606,7 +608,7 @@
       }
 
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 12, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
@@ -614,7 +616,7 @@
       ctx.stroke();
     }
 
-    // --- INTERACTION & TREMOR LOGIC ---
+    // --- INTERACTION & VIGOROUS TREMOR LOGIC ---
     function handlePointerDown(e) {
       if (document.getElementById('maze-overlay').style.display !== 'none') return;
       isDragging = true;
@@ -630,8 +632,9 @@
 
       totalPathPoints++;
 
+      // More vigorous Essential Tremor simulation applied in Phase 1
       if (currentPhase === 1) {
-        const tremorIntensity = 18;
+        const tremorIntensity = 28; // Increased magnitude for more vigorous shaking
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
@@ -660,108 +663,4 @@
 
       drawCircuitBoard();
 
-      const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
-      if (distToEnd < 20) {
-        stopTimer();
-        isDragging = false;
-        triggerHaptic([80, 50, 80]);
-        playSound('success');
-        handlePhaseComplete();
-      }
-    }
-
-    function handlePointerUp() {
-      isDragging = false;
-    }
-
-    canvas.addEventListener('pointerdown', handlePointerDown);
-    canvas.addEventListener('pointermove', handlePointerMove);
-    canvas.addEventListener('pointerup', handlePointerUp);
-
-    // --- GAME FLOW LOGIC ---
-    function handlePhaseComplete() {
-      if (currentPhase === 1) {
-        showScreen('screen-video');
-        const vid = document.getElementById('proletVideo');
-        if (vid) {
-          vid.currentTime = 0;
-          vid.play().catch(e => {});
-        }
-      } else {
-        renderResults();
-      }
-    }
-
-    function finishVideo() {
-      const vid = document.getElementById('proletVideo');
-      if (vid) vid.pause();
-      showScreen('screen-register');
-    }
-
-    function goToVideoFromFail() {
-      showScreen('screen-video');
-      const vid = document.getElementById('proletVideo');
-      if (vid) {
-        vid.currentTime = 0;
-        vid.play().catch(e => {});
-      }
-    }
-
-    function submitRegistration(e) {
-      e.preventDefault();
-      doctorData.name = document.getElementById('docName').value.trim();
-      doctorData.specialty = document.getElementById('docSpecialty').value.trim() || 'Neurology';
-
-      startPostTreatment();
-    }
-
-    function renderResults() {
-      const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      
-      let stabilityPct = Math.max(70, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 95)));
-
-      document.getElementById('res-stability').innerText = `${stabilityPct}%`;
-      document.getElementById('res-time').innerText = `${timeTaken}s`;
-
-      if (doctorData.name) {
-        leaderboard.push({
-          name: doctorData.name,
-          specialty: doctorData.specialty,
-          stability: stabilityPct,
-          time: timeTaken
-        });
-      }
-
-      leaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
-
-      const tbody = document.getElementById('leaderboard-body');
-      tbody.innerHTML = '';
-      
-      if (leaderboard.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">No entries yet. Be the first!</td></tr>`;
-      } else {
-        leaderboard.slice(0, 5).forEach((entry, idx) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><span class="badge-rank">${idx + 1}</span></td>
-            <td><strong>${entry.name}</strong><br><small style="color:#777">${entry.specialty}</small></td>
-            <td style="color:var(--prolet-green); font-weight:bold;">${entry.stability}%</td>
-            <td style="color:var(--prolet-blue); font-weight:bold;">${entry.time}s</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      showScreen('screen-results');
-    }
-
-    function resetToStart() {
-      currentPhase = 1;
-      doctorData = { name: '', specialty: '' };
-      document.getElementById('docName').value = '';
-      document.getElementById('docSpecialty').value = '';
-      showScreen('screen-intro');
-    }
-  </script>
-</body>
-</html>
+      const distToEnd = Math.hypot(play
