@@ -29,8 +29,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
+      margin: 0;
       overflow-x: hidden;
       touch-action: none;
     }
@@ -44,11 +44,11 @@
       align-items: center;
       box-shadow: 0 4px 15px rgba(0,0,0,0.06);
       border-bottom: 3px solid var(--prolet-blue);
-      z-index: 10;
+      flex-shrink: 0;
     }
 
     .brand-logo-img {
-      height: 48px;
+      height: 44px;
       object-fit: contain;
     }
 
@@ -65,23 +65,22 @@
     main {
       flex: 1;
       width: 100%;
-      max-width: 950px;
+      max-width: 900px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 15px;
+      padding: 20px;
       position: relative;
     }
 
+    /* Screen visibility management */
     .screen {
       display: none;
       width: 100%;
-      height: 100%;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
     }
 
     .screen.active {
@@ -90,17 +89,18 @@
 
     .card {
       background: white;
-      padding: 30px 40px;
+      padding: 30px 35px;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      max-width: 550px;
+      max-width: 520px;
       width: 100%;
       border-top: 5px solid var(--prolet-blue);
+      text-align: center;
     }
 
     h1 {
       color: var(--prolet-blue);
-      font-size: 1.8rem;
+      font-size: 1.7rem;
       margin-bottom: 12px;
     }
 
@@ -120,7 +120,6 @@
       font-weight: 700;
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
       box-shadow: 0 4px 12px rgba(40, 96, 155, 0.3);
     }
 
@@ -137,8 +136,8 @@
       display: flex;
       justify-content: space-between;
       width: 100%;
-      max-width: 800px;
-      margin-bottom: 10px;
+      max-width: 780px;
+      margin-bottom: 12px;
       background: white;
       padding: 10px 20px;
       border-radius: 10px;
@@ -170,12 +169,15 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
-      touch-action: none;
+      max-width: 100%;
     }
 
     canvas {
       display: block;
       touch-action: none;
+      width: 100%;
+      height: auto;
+      max-width: 780px;
     }
 
     .form-group {
@@ -217,7 +219,7 @@
 
     video {
       width: 100%;
-      height: 360px;
+      height: 350px;
       object-fit: contain;
       display: block;
       background: #000;
@@ -236,11 +238,6 @@
       font-weight: 700;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 5;
-      transition: transform 0.2s;
-    }
-
-    .skip-btn:active {
-      transform: scale(0.95);
     }
 
     .leaderboard-table {
@@ -279,13 +276,14 @@
     .instruction-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(13, 27, 42, 0.92);
+      background: rgba(13, 27, 42, 0.94);
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 25px;
+      text-align: center;
       z-index: 5;
     }
   </style>
@@ -318,10 +316,10 @@
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
       <div class="canvas-container">
-        <canvas id="mazeCanvas" width="800" height="480"></canvas>
+        <canvas id="mazeCanvas" width="780" height="440"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
-          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px;">Touch or click and drag the node at <strong>START</strong> along the circuit.</p>
+          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 10px;">Pre-Treatment Circuit Trace</h2>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch or click and drag the node at <strong>START</strong> along the circuit.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin Trace</button>
         </div>
       </div>
@@ -468,7 +466,6 @@
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Strict single sequential channel circuit
     const mazeMap = [
       [0,0,0,0,0,0,0,0,0,0,0,0],
       [0,2,1,1,1,1,1,1,1,1,3,0],
@@ -612,7 +609,6 @@
       ctx.stroke();
     }
 
-    // --- RELIABLE CROSS-DEVICE COORDINATE TRANSLATION ---
     function getCanvasCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -639,7 +635,6 @@
 
       totalPathPoints++;
 
-      // Vigorous tremor shaking displacement in Phase 1
       if (currentPhase === 1) {
         const tremorIntensity = 28;
         targetX += (Math.random() - 0.5) * tremorIntensity;
@@ -684,7 +679,6 @@
       isDragging = false;
     }
 
-    // Touch & Mouse Event Listeners
     canvas.addEventListener('touchstart', handleStart, { passive: false });
     canvas.addEventListener('touchmove', handleMove, { passive: false });
     canvas.addEventListener('touchend', handleEnd);
@@ -693,7 +687,6 @@
     canvas.addEventListener('mousemove', handleMove);
     canvas.addEventListener('mouseup', handleEnd);
 
-    // --- GAME FLOW LOGIC ---
     function handlePhaseComplete() {
       if (currentPhase === 1) {
         showScreen('screen-video');
