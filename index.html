@@ -74,7 +74,6 @@
       position: relative;
     }
 
-    /* Screen visibility management */
     .screen {
       display: none;
       width: 100%;
@@ -300,7 +299,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Neurological Circuit Trace</h1>
-        <p>Test precision on a single-path circuit trace. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
+        <p>Test precision on a single continuous track with bends. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
         <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
           ⚠️ Maximum 30 wall collisions permitted before failing.
         </p>
@@ -319,7 +318,7 @@
         <canvas id="mazeCanvas" width="780" height="440"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 10px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch or click and drag the node at <strong>START</strong> along the circuit.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch or click and drag the node at <strong>START</strong> along the single track.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Begin Trace</button>
         </div>
       </div>
@@ -462,37 +461,27 @@
     let doctorData = { name: '', specialty: '' };
     let leaderboard = [];
 
-    // --- CANVAS & WIDER SINGLE-WAY CIRCUIT CONFIG ---
+    // --- TRUE SINGLE BENDING TRACK PATH CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    const mazeMap = [
-      [0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,2,1,1,1,1,1,1,1,1,3,0],
-      [0,0,0,0,0,0,0,0,0,0,1,0],
-      [0,1,1,1,1,1,1,1,1,1,1,0],
-      [0,1,0,0,0,0,0,0,0,0,0,0],
-      [0,1,1,1,1,1,1,1,1,1,1,0],
-      [0,0,0,0,0,0,0,0,0,0,1,0],
-      [0,1,1,1,1,1,1,1,1,1,1,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0]
+    // Define strict single track waypoints (X, Y in canvas coordinates) forming a single winding path with bends
+    const trackPoints = [
+      { x: 70, y: 370 },   // START
+      { x: 70, y: 90 },    // Bend 1 up
+      { x: 230, y: 90 },   // Bend 2 right
+      { x: 230, y: 350 },  // Bend 3 down
+      { x: 390, y: 350 },  // Bend 4 right
+      { x: 390, y: 90 },   // Bend 5 up
+      { x: 550, y: 90 },   // Bend 6 right
+      { x: 550, y: 350 },  // Bend 7 down
+      { x: 710, y: 350 },  // Bend 8 right
+      { x: 710, y: 90 }    // FINISH
     ];
 
-    const cols = mazeMap[0].length;
-    const rows = mazeMap.length;
-    const cellW = canvas.width / cols;
-    const cellH = canvas.height / rows;
+    const trackWidth = 52; // Wide single track
 
-    let playerPos = { x: 0, y: 0 };
-    let startPos = { x: 0, y: 0 };
-    let endPos = { x: 0, y: 0 };
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (mazeMap[r][c] === 2) startPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
-        if (mazeMap[r][c] === 3) endPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
-      }
-    }
+    let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
       if ('vibrate' in navigator) {
@@ -520,7 +509,7 @@
     function setupGameUI() {
       wallHitsCount = 0;
       totalPathPoints = 0;
-      playerPos = { ...startPos };
+      playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
       const hudPhase = document.getElementById('hud-phase');
       const overlayTitle = document.getElementById('overlay-title');
@@ -533,14 +522,14 @@
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
         hudPhase.className = "phase-badge phase-2";
-        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Circuit Trace";
+        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Track Trace";
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
       document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
       document.getElementById('hud-timer').innerText = "0.0s";
       document.getElementById('maze-overlay').style.display = 'flex';
-      drawCircuitBoard();
+      drawTrack();
     }
 
     function beginMazeDrag() {
@@ -560,46 +549,73 @@
       clearInterval(timerInterval);
     }
 
-    function drawCircuitBoard() {
+    // Helper: Distance from point (px, py) to line segment (x1, y1) -> (x2, y2)
+    function distanceToSegment(px, py, x1, y1, x2, y2) {
+      const l2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+      if (l2 === 0) return Math.hypot(px - x1, py - y1);
+      let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+    }
+
+    // Check if position is inside the single winding track
+    function isOnTrack(x, y) {
+      for (let i = 0; i < trackPoints.length - 1; i++) {
+        const dist = distanceToSegment(x, y, trackPoints[i].x, trackPoints[i].y, trackPoints[i+1].x, trackPoints[i+1].y);
+        if (dist <= trackWidth / 2) return true;
+      }
+      return false;
+    }
+
+    function drawTrack() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const x = c * cellW;
-          const y = r * cellH;
+      // Draw background board
+      ctx.fillStyle = "#1b263b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          if (mazeMap[r][c] === 0) {
-            ctx.fillStyle = "#1b263b";
-            ctx.fillRect(x, y, cellW, cellH);
-          } else {
-            ctx.fillStyle = "#112233";
-            ctx.fillRect(x, y, cellW, cellH);
+      // Draw the single continuous track with thick borders (dividers)
+      ctx.strokeStyle = "#28609b";
+      ctx.lineWidth = trackWidth + 6;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
 
-            ctx.strokeStyle = "#28609b";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x + 2, y + 2, cellW - 4, cellH - 4);
-          }
-
-          if (mazeMap[r][c] === 2) {
-            ctx.fillStyle = "rgba(40, 167, 69, 0.3)";
-            ctx.fillRect(x, y, cellW, cellH);
-            ctx.fillStyle = "#28a745";
-            ctx.font = "bold 11px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("START", x + cellW/2, y + cellH/2 + 4);
-          }
-
-          if (mazeMap[r][c] === 3) {
-            ctx.fillStyle = "rgba(235, 51, 56, 0.3)";
-            ctx.fillRect(x, y, cellW, cellH);
-            ctx.fillStyle = "#eb3338";
-            ctx.font = "bold 11px sans-serif";
-            ctx.textAlign = "center";
-            ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 4);
-          }
-        }
+      ctx.beginPath();
+      ctx.moveTo(trackPoints[0].x, trackPoints[0].y);
+      for (let i = 1; i < trackPoints.length; i++) {
+        ctx.lineTo(trackPoints[i].x, trackPoints[i].y);
       }
+      ctx.stroke();
 
+      // Track inner floor
+      ctx.strokeStyle = "#112233";
+      ctx.lineWidth = trackWidth;
+      ctx.stroke();
+
+      // START node indicator
+      ctx.fillStyle = "#28a745";
+      ctx.beginPath();
+      ctx.arc(trackPoints[0].x, trackPoints[0].y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
+
+      // FINISH node indicator
+      const last = trackPoints[trackPoints.length - 1];
+      ctx.fillStyle = "#eb3338";
+      ctx.beginPath();
+      ctx.arc(last.x, last.y, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("FINISH", last.x, last.y);
+
+      // Player cursor node
       ctx.beginPath();
       ctx.arc(playerPos.x, playerPos.y, 14, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
@@ -635,38 +651,38 @@
 
       totalPathPoints++;
 
+      // Vigorous tremor shaking displacement in Phase 1
       if (currentPhase === 1) {
         const tremorIntensity = 28;
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
 
-      const cellC = Math.floor(targetX / cellW);
-      const cellR = Math.floor(targetY / cellH);
+      // Check if target is inside the track dividers
+      if (isOnTrack(targetX, targetY)) {
+        playerPos.x = targetX;
+        playerPos.y = targetY;
+      } else {
+        // Wall / Divider hit!
+        wallHitsCount++;
+        document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
+        triggerHaptic(50);
+        playSound('hit');
 
-      if (cellC >= 0 && cellC < cols && cellR >= 0 && cellR < rows) {
-        if (mazeMap[cellR][cellC] === 0) {
-          wallHitsCount++;
-          document.getElementById('hud-hits').innerText = `${wallHitsCount}/30`;
-          triggerHaptic(50);
-          playSound('hit');
-
-          if (wallHitsCount >= 30) {
-            stopTimer();
-            isDragging = false;
-            showScreen('screen-fail');
-            return;
-          }
-        } else {
-          playerPos.x = targetX;
-          playerPos.y = targetY;
+        if (wallHitsCount >= 30) {
+          stopTimer();
+          isDragging = false;
+          showScreen('screen-fail');
+          return;
         }
       }
 
-      drawCircuitBoard();
+      drawTrack();
 
-      const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
-      if (distToEnd < 22) {
+      // Check arrival at FINISH
+      const last = trackPoints[trackPoints.length - 1];
+      const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
+      if (distToEnd < 20) {
         stopTimer();
         isDragging = false;
         triggerHaptic([80, 50, 80]);
