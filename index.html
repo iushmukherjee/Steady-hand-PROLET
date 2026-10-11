@@ -1,1 +1,693 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Prolet - Essential Tremor Experience | IANCON</title>
+  <style>
+    :root {
+      --prolet-blue: #28609b;
+      --prolet-red: #eb3338;
+      --prolet-dark: #222222;
+      --prolet-light: #f4f7fa;
+      --prolet-gray: #e2e8f0;
+      --prolet-green: #28a745;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--prolet-light);
+      color: var(--prolet-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      background: white;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+      border-bottom: 3px solid var(--prolet-blue);
+      z-index: 10;
+    }
+
+    .brand-logo-img {
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .event-badge {
+      background: var(--prolet-blue);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Start Screen */
+    .card {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      max-width: 550px;
+      width: 100%;
+      border-top: 5px solid var(--prolet-blue);
+    }
+
+    h1 {
+      color: var(--prolet-blue);
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+
+    .btn {
+      background-color: var(--prolet-blue);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(40, 96, 155, 0.3);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-red {
+      background-color: var(--prolet-red);
+      box-shadow: 0 4px 12px rgba(235, 51, 56, 0.3);
+    }
+
+    /* HUD Bar */
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 10px;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      font-weight: 600;
+    }
+
+    .phase-badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: white;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .phase-1 { background: var(--prolet-red); }
+    .phase-2 { background: var(--prolet-green); }
+
+    .stat-val {
+      color: var(--prolet-blue);
+      font-weight: bold;
+    }
+
+    /* Canvas Frame */
+    .canvas-container {
+      position: relative;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: 3px solid var(--prolet-blue);
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+
+    /* Form Styles */
+    .form-group {
+      text-align: left;
+      margin-bottom: 18px;
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #444;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--prolet-gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--prolet-blue);
+    }
+
+    /* Video Container */
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      background: #000;
+    }
+
+    .video-mock {
+      width: 100%;
+      height: 360px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .skip-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* Leaderboard Table */
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    .leaderboard-table th, .leaderboard-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--prolet-gray);
+      font-size: 0.95rem;
+    }
+
+    .leaderboard-table th {
+      background: var(--prolet-light);
+      color: var(--prolet-blue);
+      font-weight: 700;
+    }
+
+    .badge-rank {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: var(--prolet-blue);
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    /* Instruction Overlay */
+    .instruction-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="logo.png" alt="Prolet Logo" class="brand-logo-img" onerror="this.outerHTML='<h2 style=\'color:var(--prolet-blue)\'>Pro<span style=\'color:var(--prolet-red)\'>O</span>let</h2>'">
+    <div class="event-badge">IANCON 2026</div>
+  </header>
+
+  <main>
+    <!-- SCREEN 1: PRE-TREATMENT INTRO -->
+    <div id="screen-intro" class="screen active">
+      <div class="card">
+        <h1>Essential Tremor Experience</h1>
+        <p>Experience the impact of tremor on precise motor control. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the maze.</p>
+        <p style="color: var(--prolet-red); font-weight: 600; font-size: 0.9rem;">
+          ⚠️ Maximum 5 wall collisions permitted per attempt.
+        </p>
+        <button class="btn btn-red" onclick="startPreTreatment()">Start Pre-Treatment Experience</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: GAMEPLAY (MAZE) -->
+    <div id="screen-game" class="screen">
+      <div class="hud">
+        <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
+        <div>Hits Left: <span id="hud-hits" class="stat-val" style="color: var(--prolet-red);">5/5</span></div>
+        <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
+      </div>
+      <div class="canvas-container">
+        <canvas id="mazeCanvas" width="700" height="450"></canvas>
+        <div id="maze-overlay" class="instruction-overlay">
+          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 8px;">Pre-Treatment Phase</h2>
+          <p id="overlay-text" style="margin-bottom: 20px;">Touch and drag the marker at <strong>START</strong> to navigate.</p>
+          <button class="btn" onclick="beginMazeDrag()">Begin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: VIDEO SCREEN -->
+    <div id="screen-video" class="screen">
+      <h2 style="color: var(--prolet-blue); margin-bottom: 12px;">Discover Prolet Therapeutic Efficacy</h2>
+      <div class="video-container">
+        <img src="video.png" alt="Prolet Mechanism Video" class="video-mock" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'650\' height=\'360\'><rect width=\'100%\' height=\'100%\' fill=\'%2328609b\'/><text x=\'50%\' y=\'50%\' fill=\'white\' font-family=\'sans-serif\' font-size=\'24\' text-anchor=\'middle\'>Prolet Tremor Control Mechanism Video</text></svg>'">
+        <button class="skip-btn" onclick="finishVideo()">Skip / Continue &#10095;</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: REGISTRATION SCREEN -->
+    <div id="screen-register" class="screen">
+      <div class="card">
+        <h1>Doctor Registration</h1>
+        <p>Register your details to test your precision in the <strong>Post-Prolet Phase</strong> and join the IANCON Leaderboard.</p>
+        <form onsubmit="submitRegistration(event)">
+          <div class="form-group">
+            <label for="docName">Full Name / Dr. Name *</label>
+            <input type="text" id="docName" placeholder="Dr. Jane Doe" required>
+          </div>
+          <div class="form-group">
+            <label for="docSpecialty">Specialty / Institution</label>
+            <input type="text" id="docSpecialty" placeholder="Neurology, AIIMS">
+          </div>
+          <button type="submit" class="btn">Proceed to Post-Prolet Test</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: GAME OVER SCREEN -->
+    <div id="screen-fail" class="screen">
+      <div class="card" style="border-top-color: var(--prolet-red);">
+        <h1 style="color: var(--prolet-red);">Tremor Limit Exceeded!</h1>
+        <p>Severe involuntary tremor caused <strong>5 wall collisions</strong>, preventing maze navigation.</p>
+        <p>Learn how Prolet provides targeted tremor stabilization.</p>
+        <button class="btn" onclick="goToVideoDirectly()">Watch Prolet Solution</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: RESULTS & LEADERBOARD -->
+    <div id="screen-results" class="screen">
+      <div class="card" style="max-width: 650px;">
+        <h1>Post-Prolet Precision Assessment</h1>
+        <div style="display: flex; justify-around: space-around; margin: 20px 0; background: var(--prolet-light); padding: 15px; border-radius: 10px;">
+          <div>
+            <div style="font-size:0.85rem; color:#666;">Stability Score</div>
+            <div id="res-stability" style="font-size: 1.8rem; font-weight:bold; color:var(--prolet-green);">98%</div>
+          </div>
+          <div>
+            <div style="font-size:0.85rem; color:#666;">Time Taken</div>
+            <div id="res-time" style="font-size: 1.8rem; font-weight:bold; color:var(--prolet-blue);">12.4s</div>
+          </div>
+        </div>
+
+        <h3 style="color: var(--prolet-blue); text-align: left; margin-top: 10px;">IANCON Top Performers</h3>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Doctor</th>
+              <th>Stability</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+
+        <button class="btn" onclick="resetToStart()">Finish & Restart Demo</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // --- APP STATE ---
+    let currentPhase = 1; // 1: Pre-treatment, 2: Post-Prolet
+    let hitsRemaining = 5;
+    let collisionsCount = 0;
+    let totalPathPoints = 0;
+    let startTime = 0;
+    let timerInterval = null;
+    let isDragging = false;
+    let doctorData = { name: '', specialty: '' };
+
+    // Default Leaderboard Data
+    let leaderboard = [
+      { name: "Dr. A. Sharma", specialty: "Neurology", stability: 98, time: 10.2 },
+      { name: "Dr. R. Kulkarni", specialty: "Neuro-medicine", stability: 95, time: 11.8 },
+      { name: "Dr. P. Mehta", specialty: "Movement Dis.", stability: 92, time: 13.1 }
+    ];
+
+    // --- CANVAS & MAZE CONFIG ---
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Maze grid map (0: Wall, 1: Path, 2: Start, 3: End)
+    const mazeMap = [
+      [0,0,0,0,0,0,0,0,0,0],
+      [0,2,1,1,0,1,1,1,3,0],
+      [0,0,0,1,0,1,0,0,1,0],
+      [0,1,1,1,1,1,0,1,1,0],
+      [0,1,0,0,0,0,0,1,0,0],
+      [0,1,1,1,1,1,1,1,1,0],
+      [0,0,0,0,0,0,0,0,0,0]
+    ];
+
+    const cols = mazeMap[0].length;
+    const rows = mazeMap.length;
+    const cellW = canvas.width / cols;
+    const cellH = canvas.height / rows;
+
+    let playerPos = { x: 0, y: 0 };
+    let startPos = { x: 0, y: 0 };
+    let endPos = { x: 0, y: 0 };
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (mazeMap[r][c] === 2) startPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
+        if (mazeMap[r][c] === 3) endPos = { x: c * cellW + cellW/2, y: r * cellH + cellH/2 };
+      }
+    }
+
+    // --- NAVIGATION LOGIC ---
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function startPreTreatment() {
+      currentPhase = 1;
+      setupGameUI();
+      showScreen('screen-game');
+    }
+
+    function startPostTreatment() {
+      currentPhase = 2;
+      setupGameUI();
+      showScreen('screen-game');
+    }
+
+    function setupGameUI() {
+      hitsRemaining = 5;
+      collisionsCount = 0;
+      totalPathPoints = 0;
+      playerPos = { ...startPos };
+
+      const hudPhase = document.getElementById('hud-phase');
+      const overlayTitle = document.getElementById('overlay-title');
+
+      if (currentPhase === 1) {
+        hudPhase.innerText = "Phase 1: Pre-Treatment";
+        hudPhase.className = "phase-badge phase-1";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Tremor Simulation";
+        overlayTitle.style.color = "var(--prolet-red)";
+      } else {
+        hudPhase.innerText = "Phase 2: Post-Prolet";
+        hudPhase.className = "phase-badge phase-2";
+        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Navigation";
+        overlayTitle.style.color = "var(--prolet-green)";
+      }
+
+      document.getElementById('hud-hits').innerText = `${hitsRemaining}/5`;
+      document.getElementById('hud-timer').innerText = "0.0s";
+      document.getElementById('maze-overlay').style.display = 'flex';
+      drawMaze();
+    }
+
+    function beginMazeDrag() {
+      document.getElementById('maze-overlay').style.display = 'none';
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 100);
+      isDragging = false;
+    }
+
+    function updateTimer() {
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('hud-timer').innerText = `${elapsed}s`;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+    }
+
+    // --- MAZE RENDERING ---
+    function drawMaze() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = c * cellW;
+          const y = r * cellH;
+
+          if (mazeMap[r][c] === 0) {
+            ctx.fillStyle = "#28609b";
+            ctx.fillRect(x, y, cellW, cellH);
+          } else {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x, y, cellW, cellH);
+
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x, y, cellW, cellH);
+          }
+
+          if (mazeMap[r][c] === 2) {
+            ctx.fillStyle = "rgba(40, 167, 69, 0.2)";
+            ctx.fillRect(x, y, cellW, cellH);
+            ctx.fillStyle = "#28a745";
+            ctx.font = "bold 14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("START", x + cellW/2, y + cellH/2 + 5);
+          }
+
+          if (mazeMap[r][c] === 3) {
+            ctx.fillStyle = "rgba(235, 51, 56, 0.2)";
+            ctx.fillRect(x, y, cellW, cellH);
+            ctx.fillStyle = "#eb3338";
+            ctx.font = "bold 14px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("FINISH", x + cellW/2, y + cellH/2 + 5);
+          }
+        }
+      }
+
+      ctx.beginPath();
+      ctx.arc(playerPos.x, playerPos.y, 16, 0, Math.PI * 2);
+      ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+    }
+
+    // --- INTERACTION & TREMOR LOGIC ---
+    function handlePointerMove(e) {
+      if (document.getElementById('maze-overlay').style.display !== 'none') return;
+
+      const rect = canvas.getBoundingClientRect();
+      let targetX = e.clientX - rect.left;
+      let targetY = e.clientY - rect.top;
+
+      const distToPlayer = Math.hypot(targetX - playerPos.x, targetY - playerPos.y);
+      if (!isDragging && distToPlayer < 35) {
+        isDragging = true;
+      }
+
+      if (!isDragging) return;
+
+      totalPathPoints++;
+
+      if (currentPhase === 1) {
+        const tremorIntensity = 18;
+        targetX += (Math.random() - 0.5) * tremorIntensity;
+        targetY += (Math.random() - 0.5) * tremorIntensity;
+      }
+
+      const cellC = Math.floor(targetX / cellW);
+      const cellR = Math.floor(targetY / cellH);
+
+      if (cellC >= 0 && cellC < cols && cellR >= 0 && cellR < rows) {
+        if (mazeMap[cellR][cellC] === 0) {
+          collisionsCount++;
+          if (currentPhase === 1) {
+            hitsRemaining--;
+            document.getElementById('hud-hits').innerText = `${hitsRemaining}/5`;
+
+            if (hitsRemaining <= 0) {
+              stopTimer();
+              isDragging = false;
+              showScreen('screen-fail');
+              return;
+            }
+          }
+        } else {
+          playerPos.x = targetX;
+          playerPos.y = targetY;
+        }
+      }
+
+      drawMaze();
+
+      const distToEnd = Math.hypot(playerPos.x - endPos.x, playerPos.y - endPos.y);
+      if (distToEnd < 25) {
+        stopTimer();
+        isDragging = false;
+        handlePhaseComplete();
+      }
+    }
+
+    function handlePointerUp() {
+      isDragging = false;
+    }
+
+    canvas.addEventListener('pointerdown', handlePointerMove);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerup', handlePointerUp);
+
+    // --- GAME FLOW LOGIC ---
+    function handlePhaseComplete() {
+      if (currentPhase === 1) {
+        showScreen('screen-video');
+      } else {
+        renderResults();
+      }
+    }
+
+    function finishVideo() {
+      showScreen('screen-register');
+    }
+
+    function goToVideoDirectly() {
+      showScreen('screen-video');
+    }
+
+    function submitRegistration(e) {
+      e.preventDefault();
+      doctorData.name = document.getElementById('docName').value.trim();
+      doctorData.specialty = document.getElementById('docSpecialty').value.trim() || 'Neurology';
+
+      startPostTreatment();
+    }
+
+    function renderResults() {
+      const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
+      let stabilityPct = Math.max(70, Math.min(99, Math.round(100 - (collisionsCount / (totalPathPoints || 1)) * 150)));
+
+      document.getElementById('res-stability').innerText = `${stabilityPct}%`;
+      document.getElementById('res-time').innerText = `${timeTaken}s`;
+
+      if (doctorData.name) {
+        leaderboard.push({
+          name: doctorData.name,
+          specialty: doctorData.specialty,
+          stability: stabilityPct,
+          time: timeTaken
+        });
+      }
+
+      leaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
+
+      const tbody = document.getElementById('leaderboard-body');
+      tbody.innerHTML = '';
+      leaderboard.slice(0, 5).forEach((entry, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge-rank">${idx + 1}</span></td>
+          <td><strong>${entry.name}</strong><br><small style="color:#777">${entry.specialty}</small></td>
+          <td style="color:var(--prolet-green); font-weight:bold;">${entry.stability}%</td>
+          <td style="color:var(--prolet-blue); font-weight:bold;">${entry.time}s</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      showScreen('screen-results');
+    }
+
+    function resetToStart() {
+      currentPhase = 1;
+      doctorData = { name: '', specialty: '' };
+      document.getElementById('docName').value = '';
+      document.getElementById('docSpecialty').value = '';
+      showScreen('screen-intro');
+    }
+  </script>
+</body>
+</html>
