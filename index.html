@@ -325,8 +325,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Advanced Circuit Trace Experience</h1>
-        <p>Test precision on an extended circuit featuring sharp turns and a narrow zigzag stretch. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <h1>Prolet Precision Circuit Trace</h1>
+        <p>Test precision on the symmetrical extended circuit featuring a narrow precision stretch right before the finish. Drag your stylus from <strong>START</strong> to <strong>FINISH</strong>.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -346,7 +346,7 @@
         <canvas id="mazeCanvas" width="1050" height="650"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> through the extended track. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> through the circuit and the narrow finish stretch. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -498,37 +498,36 @@
       drawTrack();
     }
 
-    // --- CANVAS TRACK DEFINITION WITH SEGMENT-SPECIFIC WIDTHS ---
+    // --- TRACK DEFINITION: ORIGINAL SNAKE + ZIGZAG + NARROW FINISH STRETCH ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Path segments: original snake -> downward loop -> zigzag section -> finish
     const trackSegments = [
-      // 1. Original Snake Track (Standard Wide: 72px)
+      // 1. Original Untouched Snake Grid (Wide: 72px)
       { p1: { x: 70, y: 320 },  p2: { x: 70, y: 70 },   width: 72 },
       { p1: { x: 70, y: 70 },   p2: { x: 220, y: 70 },  width: 72 },
       { p1: { x: 220, y: 70 },  p2: { x: 220, y: 320 }, width: 72 },
-      { p1: { x: 220, y: 320 }, p2: { x: 370, y: 320 }, width: 72 },
+      { p1: { x: 370, y: 320 }, p2: { x: 220, y: 320 }, width: 72 },
       { p1: { x: 370, y: 320 }, p2: { x: 370, y: 70 },  width: 72 },
       { p1: { x: 370, y: 70 },  p2: { x: 520, y: 70 },  width: 72 },
       { p1: { x: 520, y: 70 },  p2: { x: 520, y: 320 }, width: 72 },
-      { p1: { x: 520, y: 320 }, p2: { x: 670, y: 320 }, width: 72 },
 
-      // 2. Downward Drop & Bottom Underpass Loop
-      { p1: { x: 670, y: 320 }, p2: { x: 670, y: 560 }, width: 68 },
-      { p1: { x: 670, y: 560 }, p2: { x: 200, y: 580 }, width: 68 },
-      { p1: { x: 200, y: 580 }, p2: { x: 100, y: 480 }, width: 60 },
+      // 2. Clean Drop to Lower Tier (Standard Width: 68px)
+      { p1: { x: 520, y: 320 }, p2: { x: 600, y: 320 }, width: 68 },
+      { p1: { x: 600, y: 320 }, p2: { x: 600, y: 480 }, width: 68 },
+      { p1: { x: 600, y: 480 }, p2: { x: 120, y: 480 }, width: 68 },
 
-      // 3. Ascending Sharp Zigzag Extension (Narrow Section: 48px)
-      { p1: { x: 100, y: 480 }, p2: { x: 220, y: 380 }, width: 48 },
-      { p1: { x: 220, y: 380 }, p2: { x: 340, y: 490 }, width: 48 },
-      { p1: { x: 340, y: 490 }, p2: { x: 460, y: 380 }, width: 48 },
-      { p1: { x: 460, y: 380 }, p2: { x: 580, y: 490 }, width: 48 },
-      { p1: { x: 580, y: 490 }, p2: { x: 720, y: 380 }, width: 52 },
+      // 3. Symmetrical Centered Zigzag Section (Standard Width: 68px)
+      { p1: { x: 120, y: 480 }, p2: { x: 235, y: 370 }, width: 68 },
+      { p1: { x: 235, y: 370 }, p2: { x: 350, y: 480 }, width: 68 },
+      { p1: { x: 350, y: 480 }, p2: { x: 465, y: 370 }, width: 68 },
+      { p1: { x: 465, y: 370 }, p2: { x: 580, y: 480 }, width: 68 },
+      { p1: { x: 580, y: 480 }, p2: { x: 695, y: 370 }, width: 68 },
+      { p1: { x: 695, y: 370 }, p2: { x: 810, y: 480 }, width: 68 },
 
-      // 4. Final Approach to FINISH
-      { p1: { x: 720, y: 380 }, p2: { x: 880, y: 420 }, width: 64 },
-      { p1: { x: 880, y: 420 }, p2: { x: 960, y: 250 }, width: 64 }
+      // 4. Final Narrow Precision Stretch Right Before FINISH (Thin: 28px)
+      { p1: { x: 810, y: 480 }, p2: { x: 920, y: 480 }, width: 28 },
+      { p1: { x: 920, y: 480 }, p2: { x: 920, y: 220 }, width: 28 }
     ];
 
     let playerPos = { x: trackSegments[0].p1.x, y: trackSegments[0].p1.y };
@@ -571,7 +570,7 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment Extended Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Precision Challenge";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
@@ -685,7 +684,7 @@
 
       // Cursor node
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 20, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 18, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 4;
