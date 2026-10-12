@@ -326,7 +326,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Advanced Circuit Trace Experience</h1>
-        <p>Test precision on a complex circuit featuring zigzags and loops. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <p>Test precision on an extended winding track with rounded corners and zigzags. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -346,7 +346,7 @@
         <canvas id="mazeCanvas" width="920" height="520"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the complex circuit track. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the circuit track. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -498,29 +498,39 @@
       drawTrack();
     }
 
-    // --- COMPLEX TRACK CONFIG (WITH ZIGZAG & LOOP) ---
+    // --- EXTENDED TRACK WITH ZIGZAGS AND ROUNDED CORNERS ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 70, y: 440 },  // START
-      { x: 70, y: 360 },
-      // First Zigzag
-      { x: 150, y: 280 },
-      { x: 80, y: 200 },
-      { x: 150, y: 120 },
-      { x: 250, y: 120 },
-      // Circular Loop Section (Approximated with points)
-      { x: 310, y: 70 },  { x: 370, y: 120 }, { x: 370, y: 190 }, { x: 310, y: 240 }, { x: 250, y: 190 }, { x: 250, y: 120 },
-      // Exit Loop
-      { x: 450, y: 120 },
-      // Second Zigzag
-      { x: 530, y: 220 },
-      { x: 450, y: 320 },
-      { x: 550, y: 420 },
-      // Final Stretch to FINISH
-      { x: 700, y: 420 },
-      { x: 840, y: 100 }   // FINISH
+      { x: 80, y: 440 },   // START
+      { x: 80, y: 120 },   // Upward vertical leg
+      // Top round bend into first zigzag
+      { x: 130, y: 70 },
+      { x: 190, y: 120 },
+      { x: 140, y: 220 },  // Zigzag down-left
+      { x: 210, y: 320 },  // Zigzag down-right
+      { x: 150, y: 420 },  // Zigzag down-left
+      // Bottom round bend to upward leg
+      { x: 230, y: 450 },
+      { x: 310, y: 380 },
+      { x: 310, y: 120 },  // Middle vertical upward
+      // Rounded top curve into middle section
+      { x: 370, y: 70 },
+      { x: 440, y: 120 },
+      { x: 500, y: 220 },  // Gentle zigzag slant
+      { x: 440, y: 320 },  // Gentle zigzag back
+      { x: 510, y: 420 },
+      // Rounded bottom turn into second rightward section
+      { x: 580, y: 450 },
+      { x: 640, y: 380 },
+      { x: 640, y: 120 },  // Vertical upward right leg
+      // Smooth round top turn towards finish
+      { x: 710, y: 70 },
+      { x: 780, y: 120 },
+      { x: 720, y: 240 },  // Final zigzag maneuver
+      { x: 810, y: 360 },
+      { x: 840, y: 440 }   // FINISH
     ];
 
     const trackWidth = 72; // Wide path
@@ -564,7 +574,7 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment High Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Tremor Simulation";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
@@ -629,6 +639,7 @@
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Track outer boundary / dividers
       ctx.strokeStyle = "#28609b";
       ctx.lineWidth = trackWidth + 10;
       ctx.lineCap = "round";
@@ -641,10 +652,12 @@
       }
       ctx.stroke();
 
+      // Inner track floor
       ctx.strokeStyle = "#112233";
       ctx.lineWidth = trackWidth;
       ctx.stroke();
 
+      // START node
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
       ctx.arc(trackPoints[0].x, trackPoints[0].y, 26, 0, Math.PI * 2);
@@ -655,6 +668,7 @@
       ctx.textBaseline = "middle";
       ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
 
+      // FINISH node
       const last = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
@@ -666,7 +680,7 @@
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
-      // Large visible cursor node (22px radius)
+      // Cursor node
       ctx.beginPath();
       ctx.arc(playerPos.x, playerPos.y, 22, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
@@ -711,7 +725,7 @@
       totalPathPoints++;
 
       if (currentPhase === 1) {
-        const tremorIntensity = 60; // Highly pronounced tremor shaking
+        const tremorIntensity = 60; // Pronounced tremor shaking
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
