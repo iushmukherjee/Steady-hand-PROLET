@@ -48,7 +48,7 @@
     }
 
     .brand-logo-img {
-      height: 44px;
+      height: 48px;
       object-fit: contain;
     }
 
@@ -58,14 +58,14 @@
       padding: 6px 16px;
       border-radius: 20px;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       letter-spacing: 0.5px;
     }
 
     main {
       flex: 1;
       width: 100%;
-      max-width: 900px;
+      max-width: 1050px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -88,10 +88,10 @@
 
     .card {
       background: white;
-      padding: 30px 35px;
+      padding: 35px 40px;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      max-width: 520px;
+      max-width: 560px;
       width: 100%;
       border-top: 5px solid var(--prolet-blue);
       text-align: center;
@@ -99,15 +99,15 @@
 
     h1 {
       color: var(--prolet-blue);
-      font-size: 1.7rem;
-      margin-bottom: 12px;
+      font-size: 1.9rem;
+      margin-bottom: 14px;
     }
 
     p {
       color: #555;
       margin-bottom: 20px;
       line-height: 1.5;
-      font-size: 1rem;
+      font-size: 1.05rem;
     }
 
     .btn {
@@ -134,21 +134,23 @@
     .hud {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       width: 100%;
-      max-width: 780px;
+      max-width: 920px;
       margin-bottom: 12px;
       background: white;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       font-weight: 600;
+      font-size: 1.05rem;
     }
 
     .phase-badge {
-      padding: 4px 10px;
-      border-radius: 4px;
+      padding: 5px 12px;
+      border-radius: 6px;
       color: white;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       text-transform: uppercase;
       font-weight: bold;
     }
@@ -161,6 +163,30 @@
       font-weight: bold;
     }
 
+    .zoom-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .zoom-btn {
+      background: var(--prolet-light);
+      color: var(--prolet-blue);
+      border: 1px solid var(--prolet-gray);
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zoom-btn:active {
+      background: var(--prolet-gray);
+    }
+
     .canvas-container {
       position: relative;
       background: #0d1b2a;
@@ -169,14 +195,16 @@
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
       max-width: 100%;
+      width: 920px;
+      height: 520px;
     }
 
     canvas {
       display: block;
       touch-action: none;
       width: 100%;
-      height: auto;
-      max-width: 780px;
+      height: 100%;
+      cursor: crosshair;
     }
 
     .form-group {
@@ -187,7 +215,7 @@
 
     label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #444;
       margin-bottom: 6px;
@@ -198,7 +226,7 @@
       padding: 12px;
       border: 2px solid var(--prolet-gray);
       border-radius: 8px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       outline: none;
     }
 
@@ -209,7 +237,7 @@
     .video-container {
       position: relative;
       width: 100%;
-      max-width: 650px;
+      max-width: 700px;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
@@ -218,7 +246,7 @@
 
     video {
       width: 100%;
-      height: 350px;
+      height: 380px;
       object-fit: contain;
       display: block;
       background: #000;
@@ -247,10 +275,10 @@
     }
 
     .leaderboard-table th, .leaderboard-table td {
-      padding: 10px 12px;
+      padding: 12px;
       text-align: left;
       border-bottom: 1px solid var(--prolet-gray);
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .leaderboard-table th {
@@ -261,14 +289,14 @@
 
     .badge-rank {
       display: inline-block;
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       background: var(--prolet-blue);
       color: white;
       border-radius: 50%;
       text-align: center;
-      line-height: 24px;
-      font-size: 0.8rem;
+      line-height: 26px;
+      font-size: 0.85rem;
       font-weight: bold;
     }
 
@@ -281,7 +309,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 25px;
+      padding: 30px;
       text-align: center;
       z-index: 5;
     }
@@ -298,8 +326,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Advanced Neurological Circuit Trace</h1>
-        <p>Test precision on a high-difficulty narrow circuit track. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> without exceeding wall hits.</p>
+        <h1>Tablet Precision Circuit Trace</h1>
+        <p>Test precision on an optimized wide circuit track. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -308,14 +336,19 @@
     <div id="screen-game" class="screen">
       <div class="hud">
         <div>Phase: <span id="hud-phase" class="phase-badge phase-1">Pre-Treatment</span></div>
+        <div class="zoom-controls">
+          <button class="zoom-btn" onclick="adjustZoom(0.25)">+</button>
+          <button class="zoom-btn" onclick="adjustZoom(-0.25)">-</button>
+          <button class="zoom-btn" style="width:auto; padding:0 10px; font-size:0.85rem;" onclick="resetZoom()">100%</button>
+        </div>
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
-      <div class="canvas-container">
-        <canvas id="mazeCanvas" width="780" height="440"></canvas>
+      <div class="canvas-container" id="canvasContainer">
+        <canvas id="mazeCanvas" width="920" height="520"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
-          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 10px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd;">Touch/click and drag the node at <strong>START</strong> along the narrow track. Timer starts on movement.</p>
-          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready</button>
+          <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the wide circuit track. Timer starts on movement.</p>
+          <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
     </div>
@@ -359,7 +392,7 @@
 
     <!-- SCREEN 6: RESULTS & LEADERBOARD -->
     <div id="screen-results" class="screen">
-      <div class="card" style="max-width: 650px;">
+      <div class="card" style="max-width: 700px;">
         <h1>Post-Prolet Precision Assessment</h1>
         <div style="display: flex; justify-content: space-around; margin: 20px 0; background: var(--prolet-light); padding: 15px; border-radius: 10px;">
           <div>
@@ -448,26 +481,41 @@
     let isDragging = false;
     let doctorData = { name: '', specialty: '' };
 
-    // --- NARROW & COMPLEX TRACK CONFIG ---
+    // --- ZOOM STATE ---
+    let zoomScale = 1.0;
+    const minZoom = 1.0;
+    const maxZoom = 2.5;
+
+    function adjustZoom(delta) {
+      zoomScale = Math.min(maxZoom, Math.max(minZoom, zoomScale + delta));
+      drawTrack();
+    }
+
+    function resetZoom() {
+      zoomScale = 1.0;
+      drawTrack();
+    }
+
+    // --- TABLET-OPTIMIZED WIDE TRACK CONFIG ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 55, y: 380 },
-      { x: 55, y: 65 },
-      { x: 170, y: 65 },
-      { x: 170, y: 375 },
-      { x: 285, y: 375 },
-      { x: 285, y: 65 },
-      { x: 400, y: 65 },
-      { x: 400, y: 375 },
-      { x: 515, y: 375 },
-      { x: 515, y: 65 },
-      { x: 630, y: 65 },
-      { x: 725, y: 380 }
+      { x: 70, y: 440 },
+      { x: 70, y: 80 },
+      { x: 210, y: 80 },
+      { x: 210, y: 440 },
+      { x: 350, y: 440 },
+      { x: 350, y: 80 },
+      { x: 490, y: 80 },
+      { x: 490, y: 440 },
+      { x: 630, y: 440 },
+      { x: 630, y: 80 },
+      { x: 770, y: 80 },
+      { x: 850, y: 440 }
     ];
 
-    const trackWidth = 36; // Narrower track for increased difficulty
+    const trackWidth = 54; // Wider path for comfortable tablet interaction
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
@@ -497,6 +545,7 @@
       wallHitsCount = 0;
       totalPathPoints = 0;
       timerStarted = false;
+      zoomScale = 1.0;
       stopTimer();
       playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
@@ -506,12 +555,12 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment High-Intensity Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment Visible Tremor Simulation";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
         hudPhase.className = "phase-badge phase-2";
-        overlayTitle.innerText = "Phase 2: Post-Prolet Precision Track Trace";
+        overlayTitle.innerText = "Phase 2: Post-Prolet Smooth Track Trace";
         overlayTitle.style.color = "var(--prolet-green)";
       }
 
@@ -561,12 +610,18 @@
     }
 
     function drawTrack() {
+      ctx.save();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.scale(zoomScale, zoomScale);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.strokeStyle = "#28609b";
-      ctx.lineWidth = trackWidth + 6;
+      ctx.lineWidth = trackWidth + 8;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -583,10 +638,10 @@
 
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
-      ctx.arc(trackPoints[0].x, trackPoints[0].y, 20, 0, Math.PI * 2);
+      ctx.arc(trackPoints[0].x, trackPoints[0].y, 24, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 10px sans-serif";
+      ctx.font = "bold 11px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
@@ -594,31 +649,37 @@
       const last = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 20, 0, Math.PI * 2);
+      ctx.arc(last.x, last.y, 24, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 10px sans-serif";
+      ctx.font = "bold 11px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 12, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 15, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
       ctx.strokeStyle = "#ffffff";
       ctx.stroke();
+
+      ctx.restore();
     }
 
     function getCanvasCoords(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: (clientX - rect.left) * (canvas.width / rect.width),
-        y: (clientY - rect.top) * (canvas.height / rect.height)
-      };
+
+      let rawX = (clientX - rect.left) * (canvas.width / rect.width);
+      let rawY = (clientY - rect.top) * (canvas.height / rect.height);
+
+      let unzoomedX = (rawX - canvas.width / 2) / zoomScale + canvas.width / 2;
+      let unzoomedY = (rawY - canvas.height / 2) / zoomScale + canvas.height / 2;
+
+      return { x: unzoomedX, y: unzoomedY };
     }
 
     function handleStart(e) {
@@ -640,7 +701,7 @@
       totalPathPoints++;
 
       if (currentPhase === 1) {
-        const tremorIntensity = 34; // Increased vigorous shaking
+        const tremorIntensity = 42; // Prominent and clearly visible tremor shaking
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
@@ -665,7 +726,7 @@
 
       const last = trackPoints[trackPoints.length - 1];
       const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
-      if (distToEnd < 18) {
+      if (distToEnd < 20) {
         stopTimer();
         isDragging = false;
         triggerHaptic([80, 50, 80]);
@@ -677,6 +738,12 @@
     function handleEnd() {
       isDragging = false;
     }
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY < 0) adjustZoom(0.15);
+      else adjustZoom(-0.15);
+    }, { passive: false });
 
     canvas.addEventListener('touchstart', handleStart, { passive: false });
     canvas.addEventListener('touchmove', handleMove, { passive: false });
@@ -747,7 +814,7 @@
 
     function renderResults() {
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      let stabilityPct = Math.max(65, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 110)));
+      let stabilityPct = Math.max(65, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 100)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
       document.getElementById('res-time').innerText = `${timeTaken}s`;
