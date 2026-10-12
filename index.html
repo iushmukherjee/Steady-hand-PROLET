@@ -347,7 +347,7 @@
         <canvas id="mazeCanvas" width="920" height="520"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the wide circuit track. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the large node at <strong>START</strong> along the wide circuit track. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -481,6 +481,9 @@
     let isDragging = false;
     let doctorData = { name: '', specialty: '' };
 
+    let lastHitTime = 0;
+    const hitCooldownMs = 180;
+
     // --- ZOOM STATE ---
     let zoomScale = 1.0;
     const minZoom = 1.0;
@@ -501,21 +504,21 @@
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 70, y: 440 },
-      { x: 70, y: 80 },
-      { x: 210, y: 80 },
-      { x: 210, y: 440 },
-      { x: 350, y: 440 },
-      { x: 350, y: 80 },
-      { x: 490, y: 80 },
-      { x: 490, y: 440 },
-      { x: 630, y: 440 },
-      { x: 630, y: 80 },
-      { x: 770, y: 80 },
-      { x: 850, y: 440 }
+      { x: 80, y: 440 },
+      { x: 80, y: 80 },
+      { x: 230, y: 80 },
+      { x: 230, y: 440 },
+      { x: 380, y: 440 },
+      { x: 380, y: 80 },
+      { x: 530, y: 80 },
+      { x: 530, y: 440 },
+      { x: 680, y: 440 },
+      { x: 680, y: 80 },
+      { x: 830, y: 80 },
+      { x: 840, y: 440 }
     ];
 
-    const trackWidth = 54; // Wider path for comfortable tablet interaction
+    const trackWidth = 72; // Extra wide path for easy tablet navigation
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
@@ -545,6 +548,7 @@
       wallHitsCount = 0;
       totalPathPoints = 0;
       timerStarted = false;
+      lastHitTime = 0;
       zoomScale = 1.0;
       stopTimer();
       playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
@@ -621,7 +625,7 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.strokeStyle = "#28609b";
-      ctx.lineWidth = trackWidth + 8;
+      ctx.lineWidth = trackWidth + 10;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -638,10 +642,10 @@
 
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
-      ctx.arc(trackPoints[0].x, trackPoints[0].y, 24, 0, Math.PI * 2);
+      ctx.arc(trackPoints[0].x, trackPoints[0].y, 26, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
@@ -649,215 +653,21 @@
       const last = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 24, 0, Math.PI * 2);
+      ctx.arc(last.x, last.y, 26, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 11px sans-serif";
+      ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
+      // Larger, highly visible cursor node (22px radius)
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 15, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 22, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 4;
       ctx.strokeStyle = "#ffffff";
       ctx.stroke();
 
-      ctx.restore();
-    }
-
-    function getCanvasCoords(e) {
-      const rect = canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-      let rawX = (clientX - rect.left) * (canvas.width / rect.width);
-      let rawY = (clientY - rect.top) * (canvas.height / rect.height);
-
-      let unzoomedX = (rawX - canvas.width / 2) / zoomScale + canvas.width / 2;
-      let unzoomedY = (rawY - canvas.height / 2) / zoomScale + canvas.height / 2;
-
-      return { x: unzoomedX, y: unzoomedY };
-    }
-
-    function handleStart(e) {
-      if (document.getElementById('maze-overlay').style.display !== 'none') return;
-      isDragging = true;
-      handleMove(e);
-    }
-
-    function handleMove(e) {
-      if (!isDragging || document.getElementById('maze-overlay').style.display !== 'none') return;
-      if (e.cancelable) e.preventDefault();
-
-      startTimerIfNeeded();
-
-      const coords = getCanvasCoords(e);
-      let targetX = coords.x;
-      let targetY = coords.y;
-
-      totalPathPoints++;
-
-      if (currentPhase === 1) {
-        const tremorIntensity = 42; // Prominent and clearly visible tremor shaking
-        targetX += (Math.random() - 0.5) * tremorIntensity;
-        targetY += (Math.random() - 0.5) * tremorIntensity;
-      }
-
-      if (isOnTrack(targetX, targetY)) {
-        playerPos.x = targetX;
-        playerPos.y = targetY;
-      } else {
-        wallHitsCount++;
-        triggerHaptic(50);
-        playSound('hit');
-
-        if (wallHitsCount >= 30) {
-          stopTimer();
-          isDragging = false;
-          triggerGameOver();
-          return;
-        }
-      }
-
-      drawTrack();
-
-      const last = trackPoints[trackPoints.length - 1];
-      const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
-      if (distToEnd < 20) {
-        stopTimer();
-        isDragging = false;
-        triggerHaptic([80, 50, 80]);
-        playSound('success');
-        handlePhaseComplete();
-      }
-    }
-
-    function handleEnd() {
-      isDragging = false;
-    }
-
-    canvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      if (e.deltaY < 0) adjustZoom(0.15);
-      else adjustZoom(-0.15);
-    }, { passive: false });
-
-    canvas.addEventListener('touchstart', handleStart, { passive: false });
-    canvas.addEventListener('touchmove', handleMove, { passive: false });
-    canvas.addEventListener('touchend', handleEnd);
-
-    canvas.addEventListener('mousedown', handleStart);
-    canvas.addEventListener('mousemove', handleMove);
-    canvas.addEventListener('mouseup', handleEnd);
-
-    function triggerGameOver() {
-      const failCard = document.getElementById('fail-card');
-      const title = document.getElementById('fail-title');
-      const msg = document.getElementById('fail-msg');
-      const btn = document.getElementById('fail-btn');
-
-      if (currentPhase === 1) {
-        failCard.style.borderTopColor = 'var(--prolet-red)';
-        title.innerText = 'Essential Tremors Uncontrolled';
-        title.style.color = 'var(--prolet-red)';
-        msg.innerText = 'Involuntary essential tremors caused significant motor disruption during navigation. Discover how Prolet provides targeted tremor stabilization.';
-        btn.innerText = 'Watch Prolet Solution';
-        btn.className = 'btn btn-red';
-      } else {
-        failCard.style.borderTopColor = 'var(--prolet-blue)';
-        title.innerText = 'Game Over';
-        title.style.color = 'var(--prolet-blue)';
-        msg.innerText = 'Maximum precision deviation reached. Try again to qualify for the IANCON Leaderboard.';
-        btn.innerText = 'Try Again';
-        btn.className = 'btn';
-      }
-
-      showScreen('screen-fail');
-    }
-
-    function handleFailAction() {
-      if (currentPhase === 1) {
-        showScreen('screen-video');
-        const vid = document.getElementById('proletVideo');
-        if (vid) { vid.currentTime = 0; vid.play().catch(e => {}); }
-      } else {
-        startPostTreatment();
-      }
-    }
-
-    function handlePhaseComplete() {
-      if (currentPhase === 1) {
-        showScreen('screen-video');
-        const vid = document.getElementById('proletVideo');
-        if (vid) { vid.currentTime = 0; vid.play().catch(e => {}); }
-      } else {
-        renderResults();
-      }
-    }
-
-    function finishVideo() {
-      const vid = document.getElementById('proletVideo');
-      if (vid) vid.pause();
-      showScreen('screen-register');
-    }
-
-    function submitRegistration(e) {
-      e.preventDefault();
-      doctorData.name = document.getElementById('docName').value.trim();
-      doctorData.specialty = document.getElementById('docSpecialty').value.trim() || 'Neurology';
-
-      startPostTreatment();
-    }
-
-    function renderResults() {
-      const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      let stabilityPct = Math.max(65, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 100)));
-
-      document.getElementById('res-stability').innerText = `${stabilityPct}%`;
-      document.getElementById('res-time').innerText = `${timeTaken}s`;
-
-      if (doctorData.name) {
-        localLeaderboard.push({
-          name: doctorData.name,
-          specialty: doctorData.specialty,
-          stability: stabilityPct,
-          time: timeTaken
-        });
-        localLeaderboard.sort((a, b) => b.stability - a.stability || a.time - b.time);
-        localStorage.setItem('prolet_leaderboard', JSON.stringify(localLeaderboard));
-      }
-
-      const tbody = document.getElementById('leaderboard-body');
-      tbody.innerHTML = '';
-      
-      if (localLeaderboard.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777;">No entries yet. Be the first!</td></tr>`;
-      } else {
-        localLeaderboard.slice(0, 5).forEach((entry, idx) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><span class="badge-rank">${idx + 1}</span></td>
-            <td><strong>${entry.name}</strong><br><small style="color:#777">${entry.specialty}</small></td>
-            <td style="color:var(--prolet-green); font-weight:bold;">${entry.stability}%</td>
-            <td style="color:var(--prolet-blue); font-weight:bold;">${entry.time}s</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      showScreen('screen-results');
-    }
-
-    function resetToStart() {
-      currentPhase = 1;
-      doctorData = { name: '', specialty: '' };
-      document.getElementById('docName').value = '';
-      document.getElementById('docSpecialty').value = '';
-      showScreen('screen-intro');
-    }
-  </script>
-</body>
-</html>
+      ctx.rest
