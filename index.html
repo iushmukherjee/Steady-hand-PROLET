@@ -325,8 +325,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Tablet Precision Circuit Trace</h1>
-        <p>Test precision on an optimized wide circuit track. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <h1>Advanced Circuit Trace Experience</h1>
+        <p>Test precision on a complex circuit featuring zigzags and loops. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -346,7 +346,7 @@
         <canvas id="mazeCanvas" width="920" height="520"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the large node at <strong>START</strong> along the wide circuit track. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the complex circuit track. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -498,26 +498,32 @@
       drawTrack();
     }
 
-    // --- TABLET-OPTIMIZED WIDE TRACK CONFIG ---
+    // --- COMPLEX TRACK CONFIG (WITH ZIGZAG & LOOP) ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 80, y: 440 },
-      { x: 80, y: 80 },
-      { x: 230, y: 80 },
-      { x: 230, y: 440 },
-      { x: 380, y: 440 },
-      { x: 380, y: 80 },
-      { x: 530, y: 80 },
-      { x: 530, y: 440 },
-      { x: 680, y: 440 },
-      { x: 680, y: 80 },
-      { x: 830, y: 80 },
-      { x: 840, y: 440 }
+      { x: 70, y: 440 },  // START
+      { x: 70, y: 360 },
+      // First Zigzag
+      { x: 150, y: 280 },
+      { x: 80, y: 200 },
+      { x: 150, y: 120 },
+      { x: 250, y: 120 },
+      // Circular Loop Section (Approximated with points)
+      { x: 310, y: 70 },  { x: 370, y: 120 }, { x: 370, y: 190 }, { x: 310, y: 240 }, { x: 250, y: 190 }, { x: 250, y: 120 },
+      // Exit Loop
+      { x: 450, y: 120 },
+      // Second Zigzag
+      { x: 530, y: 220 },
+      { x: 450, y: 320 },
+      { x: 550, y: 420 },
+      // Final Stretch to FINISH
+      { x: 700, y: 420 },
+      { x: 840, y: 100 }   // FINISH
     ];
 
-    const trackWidth = 72;
+    const trackWidth = 72; // Wide path
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
 
     function triggerHaptic(pattern = 40) {
@@ -558,7 +564,7 @@
       if (currentPhase === 1) {
         hudPhase.innerText = "Phase 1: Pre-Treatment";
         hudPhase.className = "phase-badge phase-1";
-        overlayTitle.innerText = "Phase 1: Pre-Treatment Visible Tremor Simulation";
+        overlayTitle.innerText = "Phase 1: Pre-Treatment High Tremor Simulation";
         overlayTitle.style.color = "var(--prolet-red)";
       } else {
         hudPhase.innerText = "Phase 2: Post-Prolet";
@@ -660,6 +666,7 @@
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", last.x, last.y);
 
+      // Large visible cursor node (22px radius)
       ctx.beginPath();
       ctx.arc(playerPos.x, playerPos.y, 22, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
@@ -704,7 +711,7 @@
       totalPathPoints++;
 
       if (currentPhase === 1) {
-        const tremorIntensity = 48;
+        const tremorIntensity = 60; // Highly pronounced tremor shaking
         targetX += (Math.random() - 0.5) * tremorIntensity;
         targetY += (Math.random() - 0.5) * tremorIntensity;
       }
