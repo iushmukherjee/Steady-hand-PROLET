@@ -64,12 +64,12 @@
     main {
       flex: 1;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1150px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 15px;
       position: relative;
     }
 
@@ -135,8 +135,8 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      max-width: 1100px;
-      margin-bottom: 12px;
+      max-width: 1050px;
+      margin-bottom: 10px;
       background: white;
       padding: 12px 24px;
       border-radius: 10px;
@@ -194,8 +194,8 @@
       border: 3px solid var(--prolet-blue);
       overflow: hidden;
       max-width: 100%;
-      width: 1100px;
-      height: 520px;
+      width: 1050px;
+      height: 650px;
     }
 
     canvas {
@@ -325,8 +325,8 @@
     <!-- SCREEN 1: PRE-TREATMENT INTRO -->
     <div id="screen-intro" class="screen active">
       <div class="card">
-        <h1>Advanced Extended Circuit Trace</h1>
-        <p>Test precision on an extended multi-turn circuit track. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <h1>Advanced Circuit Trace Experience</h1>
+        <p>Test precision on an extended circuit featuring sharp turns and a narrow zigzag stretch. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -343,10 +343,10 @@
         <div>Time: <span id="hud-timer" class="stat-val">0.0s</span></div>
       </div>
       <div class="canvas-container" id="canvasContainer">
-        <canvas id="mazeCanvas" width="1100" height="520"></canvas>
+        <canvas id="mazeCanvas" width="1050" height="650"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> along the extended circuit track. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> through the extended track. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -498,29 +498,40 @@
       drawTrack();
     }
 
-    // --- EXTENDED UNIFORM GRID TRACK CONFIG ---
+    // --- CANVAS TRACK DEFINITION WITH SEGMENT-SPECIFIC WIDTHS ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    const trackPoints = [
-      { x: 70, y: 380 },   // START
-      { x: 70, y: 90 },    // Up 1
-      { x: 220, y: 90 },   // Over 1
-      { x: 220, y: 380 },  // Down 1
-      { x: 370, y: 380 },  // Over 2
-      { x: 370, y: 90 },   // Up 2
-      { x: 520, y: 90 },   // Over 3
-      { x: 520, y: 380 },  // Down 2
-      { x: 670, y: 380 },  // Over 4 (Extended Section)
-      { x: 670, y: 90 },   // Up 3 (Extended Section)
-      { x: 820, y: 90 },   // Over 5 (Extended Section)
-      { x: 820, y: 380 },  // Down 3 (Extended Section)
-      { x: 970, y: 380 },  // Over 6 (Extended Section)
-      { x: 1025, y: 235 }  // FINISH
+    // Path segments: original snake -> downward loop -> zigzag section -> finish
+    const trackSegments = [
+      // 1. Original Snake Track (Standard Wide: 72px)
+      { p1: { x: 70, y: 320 },  p2: { x: 70, y: 70 },   width: 72 },
+      { p1: { x: 70, y: 70 },   p2: { x: 220, y: 70 },  width: 72 },
+      { p1: { x: 220, y: 70 },  p2: { x: 220, y: 320 }, width: 72 },
+      { p1: { x: 220, y: 320 }, p2: { x: 370, y: 320 }, width: 72 },
+      { p1: { x: 370, y: 320 }, p2: { x: 370, y: 70 },  width: 72 },
+      { p1: { x: 370, y: 70 },  p2: { x: 520, y: 70 },  width: 72 },
+      { p1: { x: 520, y: 70 },  p2: { x: 520, y: 320 }, width: 72 },
+      { p1: { x: 520, y: 320 }, p2: { x: 670, y: 320 }, width: 72 },
+
+      // 2. Downward Drop & Bottom Underpass Loop
+      { p1: { x: 670, y: 320 }, p2: { x: 670, y: 560 }, width: 68 },
+      { p1: { x: 670, y: 560 }, p2: { x: 200, y: 580 }, width: 68 },
+      { p1: { x: 200, y: 580 }, p2: { x: 100, y: 480 }, width: 60 },
+
+      // 3. Ascending Sharp Zigzag Extension (Narrow Section: 48px)
+      { p1: { x: 100, y: 480 }, p2: { x: 220, y: 380 }, width: 48 },
+      { p1: { x: 220, y: 380 }, p2: { x: 340, y: 490 }, width: 48 },
+      { p1: { x: 340, y: 490 }, p2: { x: 460, y: 380 }, width: 48 },
+      { p1: { x: 460, y: 380 }, p2: { x: 580, y: 490 }, width: 48 },
+      { p1: { x: 580, y: 490 }, p2: { x: 720, y: 380 }, width: 52 },
+
+      // 4. Final Approach to FINISH
+      { p1: { x: 720, y: 380 }, p2: { x: 880, y: 420 }, width: 64 },
+      { p1: { x: 880, y: 420 }, p2: { x: 960, y: 250 }, width: 64 }
     ];
 
-    const trackWidth = 72; // Wide path
-    let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
+    let playerPos = { x: trackSegments[0].p1.x, y: trackSegments[0].p1.y };
 
     function triggerHaptic(pattern = 40) {
       if ('vibrate' in navigator) {
@@ -552,7 +563,7 @@
       lastHitTime = 0;
       zoomScale = 1.0;
       stopTimer();
-      playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
+      playerPos = { x: trackSegments[0].p1.x, y: trackSegments[0].p1.y };
 
       const hudPhase = document.getElementById('hud-phase');
       const overlayTitle = document.getElementById('overlay-title');
@@ -607,9 +618,10 @@
     }
 
     function isOnTrack(x, y) {
-      for (let i = 0; i < trackPoints.length - 1; i++) {
-        const dist = distanceToSegment(x, y, trackPoints[i].x, trackPoints[i].y, trackPoints[i+1].x, trackPoints[i+1].y);
-        if (dist <= trackWidth / 2) return true;
+      for (let i = 0; i < trackSegments.length; i++) {
+        const seg = trackSegments[i];
+        const dist = distanceToSegment(x, y, seg.p1.x, seg.p1.y, seg.p2.x, seg.p2.y);
+        if (dist <= seg.width / 2) return true;
       }
       return false;
     }
@@ -625,50 +637,55 @@
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Sharp 90-degree square corners matching original style cleanly
-      ctx.strokeStyle = "#28609b";
-      ctx.lineWidth = trackWidth + 10;
-      ctx.lineCap = "square";
-      ctx.lineJoin = "miter";
+      // Render track borders
+      trackSegments.forEach(seg => {
+        ctx.strokeStyle = "#28609b";
+        ctx.lineWidth = seg.width + 10;
+        ctx.lineCap = "square";
+        ctx.lineJoin = "miter";
+        ctx.beginPath();
+        ctx.moveTo(seg.p1.x, seg.p1.y);
+        ctx.lineTo(seg.p2.x, seg.p2.y);
+        ctx.stroke();
+      });
 
-      ctx.beginPath();
-      ctx.moveTo(trackPoints[0].x, trackPoints[0].y);
-      for (let i = 1; i < trackPoints.length; i++) {
-        ctx.lineTo(trackPoints[i].x, trackPoints[i].y);
-      }
-      ctx.stroke();
-
-      // Inner track floor
-      ctx.strokeStyle = "#112233";
-      ctx.lineWidth = trackWidth;
-      ctx.stroke();
+      // Render inner track floor
+      trackSegments.forEach(seg => {
+        ctx.strokeStyle = "#112233";
+        ctx.lineWidth = seg.width;
+        ctx.beginPath();
+        ctx.moveTo(seg.p1.x, seg.p1.y);
+        ctx.lineTo(seg.p2.x, seg.p2.y);
+        ctx.stroke();
+      });
 
       // START node
+      const startSeg = trackSegments[0];
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
-      ctx.arc(trackPoints[0].x, trackPoints[0].y, 26, 0, Math.PI * 2);
+      ctx.arc(startSeg.p1.x, startSeg.p1.y, 26, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("START", trackPoints[0].x, trackPoints[0].y);
+      ctx.fillText("START", startSeg.p1.x, startSeg.p1.y);
 
       // FINISH node
-      const last = trackPoints[trackPoints.length - 1];
+      const lastSeg = trackSegments[trackSegments.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
-      ctx.arc(last.x, last.y, 26, 0, Math.PI * 2);
+      ctx.arc(lastSeg.p2.x, lastSeg.p2.y, 26, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("FINISH", last.x, last.y);
+      ctx.fillText("FINISH", lastSeg.p2.x, lastSeg.p2.y);
 
       // Cursor node
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 22, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 20, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 4;
@@ -738,8 +755,8 @@
 
       drawTrack();
 
-      const last = trackPoints[trackPoints.length - 1];
-      const distToEnd = Math.hypot(playerPos.x - last.x, playerPos.y - last.y);
+      const lastSeg = trackSegments[trackSegments.length - 1];
+      const distToEnd = Math.hypot(playerPos.x - lastSeg.p2.x, playerPos.y - lastSeg.p2.y);
       if (distToEnd < 22) {
         stopTimer();
         isDragging = false;
