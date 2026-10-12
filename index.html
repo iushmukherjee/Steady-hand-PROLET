@@ -847,7 +847,9 @@
 
     function renderResults() {
       const timeTaken = parseFloat(((Date.now() - startTime) / 1000).toFixed(1));
-      let stabilityPct = Math.max(65, Math.min(100, Math.round(100 - (wallHitsCount / (totalPathPoints || 1)) * 100)));
+      
+      // Stability score directly penalized per wall hit (deducting 4% per collision, flooring at 40%)
+      let stabilityPct = Math.max(40, Math.round(100 - (wallHitsCount * 4)));
 
       document.getElementById('res-stability').innerText = `${stabilityPct}%`;
       document.getElementById('res-time').innerText = `${timeTaken}s`;
