@@ -326,7 +326,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Prolet Precision Circuit Trace</h1>
-        <p>Test precision on the extended circuit featuring a narrow precision stretch right before the finish. Drag your stylus from <strong>START</strong> to <strong>FINISH</strong>.</p>
+        <p>Test precision on the narrow precision circuit trace. Drag your stylus from <strong>START</strong> to <strong>FINISH</strong>.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -346,7 +346,7 @@
         <canvas id="mazeCanvas" width="1050" height="650"></canvas>
         <div id="maze-overlay" class="instruction-overlay">
           <h2 id="overlay-title" style="color: var(--prolet-red); margin-bottom: 12px;">Pre-Treatment Circuit Trace</h2>
-          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> through the circuit and the narrow finish stretch. Timer starts on movement.</p>
+          <p id="overlay-text" style="margin-bottom: 20px; color:#ddd; font-size:1.1rem;">Touch and drag the node at <strong>START</strong> through the narrow precision track. Timer starts on movement.</p>
           <button class="btn" onclick="playSound('click'); beginMazeDrag()">Ready to Trace</button>
         </div>
       </div>
@@ -498,38 +498,37 @@
       drawTrack();
     }
 
-    // --- CLEAN NON-OVERLAPPING SINGLE PATH ---
+    // --- CLEAN NARROW TRACK DEFINITION (UNIFORM NARROW WIDTH: 34px) ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Single sequential array of points (Zero overlap grid layout)
     const trackPoints = [
-      // Top Section: Original Snake Grid (Wide: 70px)
-      { x: 80, y: 320, width: 70 },
-      { x: 80, y: 80,  width: 70 },
-      { x: 230, y: 80,  width: 70 },
-      { x: 230, y: 320, width: 70 },
-      { x: 380, y: 320, width: 70 },
-      { x: 380, y: 80,  width: 70 },
-      { x: 530, y: 80,  width: 70 },
-      { x: 530, y: 320, width: 70 },
+      // Top Section: Original Snake Grid (Narrowed to 34px)
+      { x: 80, y: 320, width: 34 },
+      { x: 80, y: 80,  width: 34 },
+      { x: 230, y: 80,  width: 34 },
+      { x: 230, y: 320, width: 34 },
+      { x: 380, y: 320, width: 34 },
+      { x: 380, y: 80,  width: 34 },
+      { x: 530, y: 80,  width: 34 },
+      { x: 530, y: 320, width: 34 },
 
-      // Transition Down to Lower Level (No crossing)
-      { x: 650, y: 320, width: 64 },
-      { x: 650, y: 550, width: 64 },
-      { x: 120, y: 550, width: 64 },
+      // Transition Down to Lower Level (Non-overlapping)
+      { x: 650, y: 320, width: 34 },
+      { x: 650, y: 550, width: 34 },
+      { x: 120, y: 550, width: 34 },
 
-      // Lower Section: Symmetrical Zigzag (Wide: 64px)
-      { x: 220, y: 430, width: 64 },
-      { x: 320, y: 550, width: 64 },
-      { x: 420, y: 430, width: 64 },
-      { x: 520, y: 550, width: 64 },
-      { x: 620, y: 430, width: 64 },
-      { x: 720, y: 550, width: 64 },
+      // Lower Section: Symmetrical Zigzag (Narrowed to 34px)
+      { x: 220, y: 430, width: 34 },
+      { x: 320, y: 550, width: 34 },
+      { x: 420, y: 430, width: 34 },
+      { x: 520, y: 550, width: 34 },
+      { x: 620, y: 430, width: 34 },
+      { x: 720, y: 550, width: 34 },
 
-      // Final Narrow Precision Corridor Right Before FINISH (Thin: 28px)
-      { x: 880, y: 550, width: 28 },
-      { x: 880, y: 220, width: 28 }  // FINISH Node
+      // Final Narrow Precision Corridor to FINISH (34px)
+      { x: 880, y: 550, width: 34 },
+      { x: 880, y: 220, width: 34 }  // FINISH Node
     ];
 
     let playerPos = { x: trackPoints[0].x, y: trackPoints[0].y };
@@ -622,7 +621,7 @@
       for (let i = 0; i < trackPoints.length - 1; i++) {
         const p1 = trackPoints[i];
         const p2 = trackPoints[i+1];
-        const segWidth = p2.width || 64;
+        const segWidth = p2.width || 34;
         const dist = distanceToSegment(x, y, p1.x, p1.y, p2.x, p2.y);
         if (dist <= segWidth / 2) return true;
       }
@@ -644,10 +643,10 @@
       for (let i = 0; i < trackPoints.length - 1; i++) {
         const p1 = trackPoints[i];
         const p2 = trackPoints[i+1];
-        const w = p2.width || 64;
+        const w = p2.width || 34;
 
         ctx.strokeStyle = "#28609b";
-        ctx.lineWidth = w + 10;
+        ctx.lineWidth = w + 8;
         ctx.lineCap = "square";
         ctx.lineJoin = "miter";
         ctx.beginPath();
@@ -660,7 +659,7 @@
       for (let i = 0; i < trackPoints.length - 1; i++) {
         const p1 = trackPoints[i];
         const p2 = trackPoints[i+1];
-        const w = p2.width || 64;
+        const w = p2.width || 34;
 
         ctx.strokeStyle = "#112233";
         ctx.lineWidth = w;
@@ -674,10 +673,10 @@
       const startPt = trackPoints[0];
       ctx.fillStyle = "#28a745";
       ctx.beginPath();
-      ctx.arc(startPt.x, startPt.y, 26, 0, Math.PI * 2);
+      ctx.arc(startPt.x, startPt.y, 24, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 12px sans-serif";
+      ctx.font = "bold 11px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("START", startPt.x, startPt.y);
@@ -686,17 +685,17 @@
       const lastPt = trackPoints[trackPoints.length - 1];
       ctx.fillStyle = "#eb3338";
       ctx.beginPath();
-      ctx.arc(lastPt.x, lastPt.y, 26, 0, Math.PI * 2);
+      ctx.arc(lastPt.x, lastPt.y, 24, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 12px sans-serif";
+      ctx.font = "bold 11px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("FINISH", lastPt.x, lastPt.y);
 
-      // Cursor node
+      // Cursor node (sized specifically for the 34px narrow path)
       ctx.beginPath();
-      ctx.arc(playerPos.x, playerPos.y, 16, 0, Math.PI * 2);
+      ctx.arc(playerPos.x, playerPos.y, 12, 0, Math.PI * 2);
       ctx.fillStyle = currentPhase === 1 ? "#eb3338" : "#28a745";
       ctx.fill();
       ctx.lineWidth = 3;
@@ -768,7 +767,7 @@
 
       const lastPt = trackPoints[trackPoints.length - 1];
       const distToEnd = Math.hypot(playerPos.x - lastPt.x, playerPos.y - lastPt.y);
-      if (distToEnd < 22) {
+      if (distToEnd < 20) {
         stopTimer();
         isDragging = false;
         triggerHaptic([80, 50, 80]);
