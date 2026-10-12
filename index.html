@@ -326,7 +326,7 @@
     <div id="screen-intro" class="screen active">
       <div class="card">
         <h1>Advanced Circuit Trace Experience</h1>
-        <p>Test precision on an extended winding track with rounded corners and zigzags. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
+        <p>Test precision on an extended circuit featuring sharp turns and zigzags. Drag your stylus or finger from <strong>START</strong> to <strong>FINISH</strong> through the circuit.</p>
         <button class="btn btn-red" onclick="playSound('click'); startPreTreatment()">Start Pre-Treatment Experience</button>
       </div>
     </div>
@@ -498,39 +498,27 @@
       drawTrack();
     }
 
-    // --- EXTENDED TRACK WITH ZIGZAGS AND ROUNDED CORNERS ---
+    // --- TRACK CONFIG: ORIGINAL SNAKE UNTOUCHED + ADDED ZIGZAG EXTENSION ---
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
 
     const trackPoints = [
-      { x: 80, y: 440 },   // START
-      { x: 80, y: 120 },   // Upward vertical leg
-      // Top round bend into first zigzag
-      { x: 130, y: 70 },
-      { x: 190, y: 120 },
-      { x: 140, y: 220 },  // Zigzag down-left
-      { x: 210, y: 320 },  // Zigzag down-right
-      { x: 150, y: 420 },  // Zigzag down-left
-      // Bottom round bend to upward leg
-      { x: 230, y: 450 },
-      { x: 310, y: 380 },
-      { x: 310, y: 120 },  // Middle vertical upward
-      // Rounded top curve into middle section
-      { x: 370, y: 70 },
-      { x: 440, y: 120 },
-      { x: 500, y: 220 },  // Gentle zigzag slant
-      { x: 440, y: 320 },  // Gentle zigzag back
-      { x: 510, y: 420 },
-      // Rounded bottom turn into second rightward section
-      { x: 580, y: 450 },
-      { x: 640, y: 380 },
-      { x: 640, y: 120 },  // Vertical upward right leg
-      // Smooth round top turn towards finish
-      { x: 710, y: 70 },
-      { x: 780, y: 120 },
-      { x: 720, y: 240 },  // Final zigzag maneuver
-      { x: 810, y: 360 },
-      { x: 840, y: 440 }   // FINISH
+      // 1. Original untouched snake starting sequence
+      { x: 70, y: 380 },
+      { x: 70, y: 90 },
+      { x: 220, y: 90 },
+      { x: 220, y: 380 },
+      { x: 370, y: 380 },
+      { x: 370, y: 90 },
+      { x: 520, y: 90 },
+      { x: 520, y: 380 },
+      // 2. Added complex sharp zigzag extension
+      { x: 600, y: 380 },
+      { x: 600, y: 150 },
+      { x: 660, y: 270 },  // Zigzag point 1
+      { x: 720, y: 150 },  // Zigzag point 2
+      { x: 780, y: 380 },
+      { x: 840, y: 380 }   // FINISH
     ];
 
     const trackWidth = 72; // Wide path
@@ -639,11 +627,11 @@
       ctx.fillStyle = "#1b263b";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Track outer boundary / dividers
+      // Sharp 90-degree square corners matching original style
       ctx.strokeStyle = "#28609b";
       ctx.lineWidth = trackWidth + 10;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.lineCap = "square";
+      ctx.lineJoin = "miter";
 
       ctx.beginPath();
       ctx.moveTo(trackPoints[0].x, trackPoints[0].y);
